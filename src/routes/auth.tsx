@@ -41,6 +41,7 @@ function AuthPage() {
   const [role, setRole] = useState<RegistrationRole>(initialRole);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
@@ -139,6 +140,10 @@ function AuthPage() {
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "signup" && password !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden. Escríbelas iguales.");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -315,11 +320,24 @@ function AuthPage() {
             <Input
               type="password"
               required
-              minLength={6}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          {mode === "signup" && (
+            <div>
+              <Label htmlFor="confirm-password" className="mb-2 block text-sm">Confirmar contraseña</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          )}
           <Button
             type="submit"
             disabled={loading}

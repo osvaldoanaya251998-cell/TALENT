@@ -90,7 +90,8 @@ async function openAuth(options = {}) {
 async function fillRegistration(page) {
   await page.locator("form input").nth(0).fill("Test Account");
   await page.locator('input[type="email"]').fill("test@example.com");
-  await page.locator('input[type="password"]').fill("Test-password-123");
+  await page.locator('input[type="password"]').first().fill("Test-password-123");
+  await page.getByLabel("Confirmar contraseña").fill("Test-password-123");
 }
 
 test("Empresa sends company metadata and overrides candidate destinations", async () => {
@@ -188,7 +189,7 @@ test("Login uses persisted company role regardless of default selector", async (
   try {
     await page.getByRole("button", { name: "Inicia sesión", exact: true }).click();
     await page.locator('input[type="email"]').fill("test@example.com");
-    await page.locator('input[type="password"]').fill("Test-password-123");
+    await page.locator('input[type="password"]').first().fill("Test-password-123");
     await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await page.waitForURL(`${origin}/recruiter/dashboard`);
     assert.equal(requests.length, 0);
@@ -310,4 +311,27 @@ test("Authorized public company signup opens enterprise menu and vacancy form", 
   } finally {
     await context.close();
   }
+});
+
+test("Signup rejects mismatched confirmation without sending a request", async () => {
+  const {page,context,requests}=await openAuth({search:"?role=company&mode=signup"});
+  try {
+    await fillRegistration(page);
+    await page.getByLabel("Confirmar contraseña").fill("different");
+    await page.getByRole("button",{name:"Crear cuenta",exact:true}).click();
+    await page.getByText("Las contraseñas no coinciden. Escríbelas iguales.").waitFor();
+    assert.equal(requests.length,0);
+  } finally { await context.close(); }
+});
+
+test("Signup does not impose character composition or length in the form", async () => {
+  const {page,context,requests}=await openAuth({search:"?role=company&mode=signup",confirmEmail:true});
+  try {
+    await fillRegistration(page);
+    await page.locator('input[type="password"]').first().fill("abc");
+    await page.getByLabel("Confirmar contraseña").fill("abc");
+    await page.getByRole("button",{name:"Crear cuenta",exact:true}).click();
+    await page.getByText("Cuenta creada. Revisa tu correo para confirmar tu cuenta.").waitFor();
+    assert.equal(requests[0].body.password,"abc");
+  } finally { await context.close(); }
 });
