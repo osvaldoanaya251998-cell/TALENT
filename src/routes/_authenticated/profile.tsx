@@ -10,7 +10,7 @@ import { z } from "zod";
 import {
   ArrowRight, CheckCircle2, FileText, Loader2, LogOut, Plus, Trash2, Upload, User, Video, X,
 } from "lucide-react";
-import momentoLogo from "@/assets/insurtalent-logo.svg";
+import momentoLogo from "@/assets/insurtalent-logo.png";
 import { PrivacyConsentCheckbox, PRIVACY_POLICY_VERSION } from "@/components/privacy-notice";
 import { fetchMyProfile, getCompletion, type Profile } from "@/lib/profile";
 

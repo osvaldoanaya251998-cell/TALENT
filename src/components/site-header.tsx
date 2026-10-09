@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
-import logo from "@/assets/insurtalent-logo.svg";
+import logo from "@/assets/insurtalent-logo.png";
 
 export function useSessionRole() {
   const [state, setState] = useState<{

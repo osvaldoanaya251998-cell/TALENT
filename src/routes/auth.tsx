@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
-import momentoLogo from "@/assets/insurtalent-logo.svg";
+import momentoLogo from "@/assets/insurtalent-logo.png";
 import {
   buildPostAuthRedirectPath,
   clearPostAuthRedirect,

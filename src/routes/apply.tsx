@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ArrowRight, Briefcase, CheckCircle2, Loader2, MapPin, User } from "lucide-react";
-import momentoLogo from "@/assets/insurtalent-logo.svg";
+import momentoLogo from "@/assets/insurtalent-logo.png";
 import { fetchMyProfile, getCompletion, type Profile } from "@/lib/profile";
 
 const searchSchema = z.object({ vacancy: z.string().optional() });

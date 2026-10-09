@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { LogOut, Search, FileText, Video, Loader2, Users, Inbox, UserCheck, Award, ExternalLink, Sparkles } from "lucide-react";
-import momentoLogo from "@/assets/insurtalent-logo.svg";
+import momentoLogo from "@/assets/insurtalent-logo.png";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useServerFn } from "@tanstack/react-start";
 import { summarizeCandidate } from "@/lib/summarize-candidate.functions";

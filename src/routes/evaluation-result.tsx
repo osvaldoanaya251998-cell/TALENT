@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, Mail, Sparkles, Trophy, AlertCircle, XCircle, Award } from "lucide-react";
 import { z } from "zod";
-import momentoLogo from "@/assets/insurtalent-logo.svg";
+import momentoLogo from "@/assets/insurtalent-logo.png";
 
 const searchSchema = z.object({ id: z.string().uuid().optional() });
 

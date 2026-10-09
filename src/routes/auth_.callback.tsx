@@ -9,7 +9,7 @@ import {
   clearPostAuthRedirect,
   readPostAuthRedirect,
 } from "@/lib/auth-redirect";
-import momentoLogo from "@/assets/insurtalent-logo.svg";
+import momentoLogo from "@/assets/insurtalent-logo.png";
 
 export const Route = createFileRoute("/auth_/callback")({
   validateSearch: (search) => z.object({ next: z.string().optional() }).parse(search),
