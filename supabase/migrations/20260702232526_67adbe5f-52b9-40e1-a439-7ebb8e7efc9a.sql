@@ -1,0 +1,1 @@
+ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS skill_tags text[] NOT NULL DEFAULT '{}';

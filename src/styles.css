@@ -1,0 +1,133 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
+}
+
+:root {
+  --radius: 0.75rem;
+  /* InsurTalent — navy corporativo + esmeralda */
+  --background: #f8fafc;
+  --foreground: #0f1b3d;
+  --card: #ffffff;
+  --card-foreground: #0f1b3d;
+  --popover: #ffffff;
+  --popover-foreground: #0f1b3d;
+
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --brand: #10b981;
+  --brand-foreground: #ffffff;
+  --navy: #0f1b3d;
+  --navy-foreground: #f8fafc;
+
+  --secondary: #eef2ff;
+  --secondary-foreground: #1e2a6b;
+  --muted: #f1f5f9;
+  --muted-foreground: #55607a;
+  --accent: #ecfdf5;
+  --accent-foreground: #0f1b3d;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #10b981;
+
+  --gradient-hero: radial-gradient(900px 480px at 85% -10%, rgba(16,185,129,0.25), transparent 60%),
+                   radial-gradient(900px 500px at 0% 0%, rgba(79,70,229,0.30), transparent 60%),
+                   linear-gradient(180deg, #0f1b3d, #13235a);
+  --gradient-brand: linear-gradient(135deg, #34d399, #10b981);
+  --shadow-glow: 0 20px 60px -20px rgba(16,185,129,0.45);
+  --shadow-soft: 0 8px 30px -12px rgba(15,27,61,0.14);
+}
+
+.dark {
+  --background: #0a1128;
+  --foreground: #e6ebf5;
+  --card: #111a38;
+  --card-foreground: #e6ebf5;
+  --popover: #111a38;
+  --popover-foreground: #e6ebf5;
+
+  --primary: #10b981;
+  --primary-foreground: #04150f;
+  --brand: #10b981;
+  --brand-foreground: #04150f;
+  --navy: #060b1c;
+  --navy-foreground: #e6ebf5;
+
+  --secondary: #18234a;
+  --secondary-foreground: #e6ebf5;
+  --muted: #18234a;
+  --muted-foreground: #94a0bd;
+  --accent: #123a33;
+  --accent-foreground: #e6ebf5;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1f2b55;
+  --input: #1f2b55;
+  --ring: #10b981;
+
+  --gradient-hero: radial-gradient(900px 480px at 85% -10%, rgba(16,185,129,0.22), transparent 60%),
+                   radial-gradient(900px 500px at 0% 0%, rgba(79,70,229,0.25), transparent 60%),
+                   linear-gradient(180deg, #060b1c, #0a1128);
+  --gradient-brand: linear-gradient(135deg, #34d399, #10b981);
+  --shadow-glow: 0 20px 60px -20px rgba(16,185,129,0.55);
+  --shadow-soft: 0 10px 40px -12px rgba(0,0,0,0.5);
+}
+
+
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body { background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-display); }
+  body { font-feature-settings: "ss01","cv11"; -webkit-font-smoothing: antialiased; }
+  ::selection { background: rgba(62,189,173,0.28); }
+}
+
+@utility bg-hero { background-image: var(--gradient-hero); }
+@utility bg-brand-gradient { background-image: var(--gradient-brand); }
+@utility shadow-glow { box-shadow: var(--shadow-glow); }
+@utility shadow-soft { box-shadow: var(--shadow-soft); }
+@utility text-balance { text-wrap: balance; }
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@utility animate-fade-up { animation: fade-up 0.7s cubic-bezier(0.2,0.7,0.2,1) both; }
+
+@keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(62,189,173,0.5); } 50% { box-shadow: 0 0 0 12px rgba(62,189,173,0); } }
+
+@utility animate-pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }

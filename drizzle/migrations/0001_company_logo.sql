@@ -1,0 +1,2 @@
+ALTER TABLE public.vacancies ADD COLUMN IF NOT EXISTS company_logo_url text;
+ALTER TABLE public.vacancies ADD CONSTRAINT vacancies_company_logo_size CHECK (company_logo_url IS NULL OR length(company_logo_url) <= 500000);

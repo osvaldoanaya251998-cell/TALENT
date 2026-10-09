@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "momento-careers-mcp",
+      "version": "0.1.0",
+      "title": "InsurTalent Careers MCP"
+    },
+    "tools": [
+      {
+        "name": "list_vacancies",
+        "title": "List active vacancies",
+        "description": "List active job vacancies (public careers listings) from InsurTalent.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "includeInactive": {
+              "description": "Include inactive vacancies (default: false).",
+              "type": "boolean"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_vacancy",
+        "title": "Get vacancy details",
+        "description": "Get details of a single vacancy by its slug.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Vacancy slug, e.g. 'ventas-junior'."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

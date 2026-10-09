@@ -1,0 +1,350 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { z } from "zod";
+import momentoLogo from "@/assets/insurtalent-logo.svg";
+import {
+  buildPostAuthRedirectPath,
+  clearPostAuthRedirect,
+  readPostAuthRedirect,
+  sanitizeNextPath,
+  savePostAuthRedirect,
+  type RegistrationRole,
+} from "@/lib/auth-redirect";
+
+const searchSchema = z.object({
+  next: z.string().optional(),
+  vacancy: z.string().optional(),
+});
+
+export const Route = createFileRoute("/auth")({
+  validateSearch: (s) => searchSchema.parse(s),
+  head: () => ({
+    meta: [{ title: "Acceso — InsurTalent Careers" }, { name: "robots", content: "noindex" }],
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const navigate = useNavigate();
+  const { next, vacancy } = Route.useSearch();
+  const [mode, setMode] = useState<"login" | "signup">("signup");
+  const [role, setRole] = useState<RegistrationRole>("candidate");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const redirecting = useRef<Promise<boolean> | null>(null);
+
+  const dest = sanitizeNextPath(next, "/profile");
+
+  const goAfterAuth = async () => {
+    if (redirecting.current) return redirecting.current;
+    redirecting.current = (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return false;
+
+      const stored = readPostAuthRedirect();
+      const targetPath = buildPostAuthRedirectPath(
+        stored ?? { next: dest, vacancy },
+        userData.user.user_metadata.role,
+      );
+
+      const { data: isAdmin } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
+      clearPostAuthRedirect();
+      if (isAdmin === true) {
+        await navigate({ to: "/admin", replace: true });
+      } else if (targetPath === "/recruiter/dashboard") {
+        await navigate({ to: "/recruiter/dashboard", replace: true });
+      } else if (targetPath === "/profile") {
+        await navigate({ to: "/profile", replace: true });
+      } else {
+        window.location.replace(targetPath);
+      }
+      return true;
+    })();
+    try {
+      return await redirecting.current;
+    } finally {
+      redirecting.current = null;
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+    let authTimeout: ReturnType<typeof setTimeout> | undefined;
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const oauthError =
+      params.get("error_description") ??
+      hashParams.get("error_description") ??
+      params.get("error") ??
+      hashParams.get("error");
+
+    if (oauthError) {
+      toast.error(oauthError);
+      setCheckingSession(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!active) return;
+      if (data.session) {
+        const moved = await goAfterAuth();
+        if (!moved && active) setCheckingSession(false);
+      } else {
+        setCheckingSession(false);
+      }
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      if (
+        session &&
+        (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")
+      ) {
+        // Run Supabase calls after its auth event has released the session lock.
+        if (authTimeout) clearTimeout(authTimeout);
+        authTimeout = setTimeout(() => {
+          if (active) void goAfterAuth();
+        }, 0);
+      }
+    });
+
+    return () => {
+      active = false;
+      if (authTimeout) clearTimeout(authTimeout);
+      sub.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (mode === "signup") {
+        const signupDestination = buildPostAuthRedirectPath({ next: dest, vacancy }, role);
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(signupDestination)}`,
+            data: { full_name: name, role },
+          },
+        });
+        if (error) throw error;
+        if (!data.session) {
+          toast.success("Cuenta creada. Revisa tu correo para confirmar tu cuenta.");
+          return;
+        }
+        toast.success("Cuenta creada. Bienvenido a InsurTalent.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Bienvenido de vuelta");
+      }
+      await goAfterAuth();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error de autenticación";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setLoading(true);
+    try {
+      // Preserve intended destination through the OAuth round-trip.
+      savePostAuthRedirect({ next: dest, vacancy });
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/auth/callback",
+      });
+      if (result.error) {
+        toast.error(result.error.message || "No se pudo iniciar sesión con Google");
+        return;
+      }
+      if (result.redirected) return;
+      await goAfterAuth();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-hero px-6 text-foreground">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          Confirmando sesión…
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-hero px-6">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-soft">
+        <Link to="/" className="mb-6 inline-flex items-center gap-2">
+          <img src={momentoLogo} alt="InsurTalent" className="h-6 w-6" />
+          <span className="text-sm font-semibold">InsurTalent Careers</span>
+        </Link>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {mode === "signup"
+            ? role === "company"
+              ? "Crea tu cuenta de empresa"
+              : "Crea tu perfil de candidato"
+            : "Bienvenido de vuelta"}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {mode === "signup"
+            ? role === "company"
+              ? "Registra tu empresa para acceder al panel de reclutamiento."
+              : "Regístrate una sola vez y aplica a todas las vacantes sin volver a llenar formularios."
+            : "Accede a tu perfil y postúlate al instante."}
+        </p>
+
+        {mode === "signup" && (
+          <div className="mt-6 grid grid-cols-2 gap-2" role="group" aria-label="Tipo de cuenta">
+            <Button
+              type="button"
+              variant={role === "candidate" ? "default" : "outline"}
+              aria-pressed={role === "candidate"}
+              disabled={loading}
+              onClick={() => setRole("candidate")}
+            >
+              Candidato
+            </Button>
+            <Button
+              type="button"
+              variant={role === "company" ? "default" : "outline"}
+              aria-pressed={role === "company"}
+              disabled={loading}
+              onClick={() => setRole("company")}
+            >
+              Empresa
+            </Button>
+          </div>
+        )}
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={loading}
+          onClick={handleGoogle}
+          className="mt-6 w-full border-border"
+        >
+          <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.26 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            />
+          </svg>
+          Continuar con Google
+        </Button>
+
+        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="h-px flex-1 bg-border" />
+          <span>o con correo</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <form onSubmit={handleEmail} className="space-y-4">
+          {mode === "signup" && (
+            <div>
+              <Label className="mb-2 block text-sm">Nombre completo</Label>
+              <Input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ana Pérez"
+              />
+            </div>
+          )}
+          <div>
+            <Label className="mb-2 block text-sm">Correo</Label>
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@correo.com"
+            />
+          </div>
+          <div>
+            <Label className="mb-2 block text-sm">Contraseña</Label>
+            <Input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary text-primary-foreground hover:opacity-90"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : mode === "signup" ? (
+              "Crear cuenta"
+            ) : (
+              "Entrar"
+            )}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          {mode === "signup" ? (
+            <>
+              ¿Ya tienes cuenta?{" "}
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="font-medium text-primary hover:underline"
+              >
+                Inicia sesión
+              </button>
+            </>
+          ) : (
+            <>
+              ¿Nuevo en InsurTalent?{" "}
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className="font-medium text-primary hover:underline"
+              >
+                Crea tu perfil
+              </button>
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
