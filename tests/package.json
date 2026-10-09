@@ -1,0 +1,13 @@
+{
+  "name": "talent-permission-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node company-registration.mjs",
+    "test:browser": "node --test company-registration.browser.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "playwright-core": "1.64.0"
+  }
+}
