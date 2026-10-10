@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "deploy:cloudflare": "npx --yes wrangler@4.149.0 deploy --config .output/server/wrangler.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
