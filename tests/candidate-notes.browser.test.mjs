@@ -39,7 +39,7 @@ async function setup(failOnce=false){
    return send(applications);
   }
   if(url.pathname==='/rest/v1/profiles') return send([
-   {user_id:'candidate-a',nombre:'Ana',ramos:['Vida'],certificaciones:[],cv_url:'candidate-a/cv.pdf'},
+   {user_id:'candidate-a',nombre:'Ana',email:'ana@example.test',telefono:'5551234567',ciudad:'Monterrey',experiencia:4,resumen:'Experiencia en seguros y atención a clientes.',skills:['Ventas'],ramos:['Vida'],certificaciones:['Cédula B'],cv_url:'candidate-a/cv.pdf'},
    {user_id:'candidate-b',nombre:'Luis',ramos:['Autos'],certificaciones:[],cv_url:null},
   ]);
   if(url.pathname.startsWith('/rest/v1/')) return send([]);
@@ -85,5 +85,56 @@ test('Failed note save preserves draft and allows retry',async()=>{
   await page.getByRole('button',{name:saveLabel,exact:true}).click();
   await page.getByText('Apuntes guardados',{exact:true}).waitFor();
   assert.equal(applications[0].notas,'Apunte pendiente');
+ }finally{await context.close();}
+});
+
+
+test('Clicking a candidate opens the summary and interview notes without visiting admin',async()=>{
+ const {context,page,applications}=await setup();
+ try{
+  await page.goto(`${origin}/recruiter/candidates`);
+  // Clicking the card body also opens the candidate, not just the name.
+  await page.locator('article').filter({hasText:'Ana'}).getByText('Agente',{exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'Ana',exact:true});
+  await dialog.waitFor();
+  await dialog.getByText('Experiencia en seguros y atención a clientes.',{exact:true}).waitFor();
+  await dialog.getByText('Monterrey',{exact:true}).waitFor();
+  await dialog.getByText('4 años',{exact:true}).waitFor();
+  assert.equal(new URL(page.url()).pathname,'/recruiter/candidates');
+  const notes=dialog.getByRole('textbox',{name:'Apuntes de entrevista',exact:true});
+  await notes.fill('Entrevistador: José\nBuena comunicación. Segunda entrevista el viernes.');
+  await dialog.getByRole('button',{name:'Guardar apuntes',exact:true}).click();
+  await dialog.getByText('Apuntes guardados',{exact:true}).waitFor();
+  assert.equal(applications[0].notas,'Entrevistador: José\nBuena comunicación. Segunda entrevista el viernes.');
+  await page.keyboard.press('Escape');
+  await page.getByRole('dialog').waitFor({state:'hidden'});
+  await page.getByRole('button',{name:'Ver resumen de Ana para Agente',exact:true}).click();
+  assert.equal(await dialog.getByRole('textbox',{name:'Apuntes de entrevista',exact:true}).inputValue(),applications[0].notas);
+  await page.keyboard.press('Escape');
+  await page.getByRole('dialog').waitFor({state:'hidden'});
+  await page.reload();
+  await page.getByRole('button',{name:'Ver resumen de Ana para Agente',exact:true}).click();
+  assert.equal(await dialog.getByRole('textbox',{name:'Apuntes de entrevista',exact:true}).inputValue(),applications[0].notas);
+  await dialog.evaluate(async (el) => { await Promise.all(el.getAnimations().map((animation) => animation.finished.catch(() => {}))); });
+  await page.screenshot({path:'/tmp/talent-candidate-summary.png'});
+  await page.setViewportSize({width:390,height:844});
+  await dialog.screenshot({path:'/tmp/talent-candidate-summary-mobile.png'});
+  const box=await dialog.boundingBox();
+  assert.ok(box.x>=0 && box.x+box.width<=390);
+  assert.ok(box.y>=0 && box.y+box.height<=844);
+ }finally{await context.close();}
+});
+
+test('Candidate name in the table opens the same summary, and controls keep working',async()=>{
+ const {context,page,updates}=await setup();
+ try{
+  await page.goto(`${origin}/recruiter/candidates?view=table`);
+  await page.getByRole('button',{name:'Ver resumen de Ana para Agente',exact:true}).click();
+  await page.getByRole('dialog',{name:'Ana',exact:true}).waitFor();
+  await page.keyboard.press('Escape');
+  await page.getByRole('dialog').waitFor({state:'hidden'});
+  await page.getByLabel('Estado de Ana para Agente',{exact:true}).selectOption('entrevista');
+  assert.equal(await page.getByRole('dialog').count(),0);
+  assert.deepEqual(updates[0].body,{status:'entrevista'});
  }finally{await context.close();}
 });
