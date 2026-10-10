@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { LogOut, Search, FileText, Video, Loader2, Users, Inbox, UserCheck, Award, ExternalLink, Sparkles } from "lucide-react";
 import momentoLogo from "@/assets/insurtalent-logo.png";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useServerFn } from "@tanstack/react-start";
 import { summarizeCandidate } from "@/lib/summarize-candidate.functions";
 import ReactMarkdown from "react-markdown";
@@ -246,7 +245,6 @@ function Admin() {
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="hidden md:inline">{userEmail}</span>
-            <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="mr-1.5 h-3.5 w-3.5" /> Salir</Button>
           </div>
         </div>

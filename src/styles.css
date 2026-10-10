@@ -40,36 +40,34 @@
 
 :root {
   --radius: 0.75rem;
-  /* InsurTalent — navy corporativo + esmeralda */
-  --background: #f8fafc;
+  /* Fondo blanco suave uniforme, con acentos esmeralda. */
+  --background: #f8f8f5;
   --foreground: #0f1b3d;
-  --card: #ffffff;
+  --card: #f8f8f5;
   --card-foreground: #0f1b3d;
-  --popover: #ffffff;
+  --popover: #f8f8f5;
   --popover-foreground: #0f1b3d;
 
-  --primary: #10b981;
+  --primary: #078468;
   --primary-foreground: #ffffff;
   --brand: #10b981;
   --brand-foreground: #ffffff;
   --navy: #0f1b3d;
   --navy-foreground: #f8fafc;
 
-  --secondary: #eef2ff;
-  --secondary-foreground: #1e2a6b;
-  --muted: #f1f5f9;
+  --secondary: #efefeb;
+  --secondary-foreground: #0f1b3d;
+  --muted: #efefeb;
   --muted-foreground: #55607a;
   --accent: #ecfdf5;
   --accent-foreground: #0f1b3d;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
+  --border: #deded8;
+  --input: #deded8;
   --ring: #10b981;
 
-  --gradient-hero: radial-gradient(900px 480px at 85% -10%, rgba(16,185,129,0.25), transparent 60%),
-                   radial-gradient(900px 500px at 0% 0%, rgba(79,70,229,0.30), transparent 60%),
-                   linear-gradient(180deg, #0f1b3d, #13235a);
+  --gradient-hero: none;
   --gradient-brand: linear-gradient(135deg, #34d399, #10b981);
   --shadow-glow: 0 20px 60px -20px rgba(16,185,129,0.45);
   --shadow-soft: 0 8px 30px -12px rgba(15,27,61,0.14);
@@ -119,7 +117,7 @@
   ::selection { background: rgba(62,189,173,0.28); }
 }
 
-@utility bg-hero { background-image: var(--gradient-hero); }
+@utility bg-hero { background-color: var(--background); background-image: none; }
 @utility bg-brand-gradient { background-image: var(--gradient-brand); }
 @utility shadow-glow { box-shadow: var(--shadow-glow); }
 @utility shadow-soft { box-shadow: var(--shadow-soft); }

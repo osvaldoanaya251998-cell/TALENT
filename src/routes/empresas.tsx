@@ -46,12 +46,12 @@ function Empresas() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <section className="bg-hero text-navy-foreground">
+      <section className="bg-hero text-foreground">
         <div className="mx-auto max-w-5xl px-6 py-24 text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight md:text-6xl">
             Recluta talento asegurador certificado
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-navy-foreground/75">
+          <p className="mx-auto mt-5 max-w-2xl text-muted-foreground">
             Aseguradoras, promotorías, brokers e insurtechs encuentran aquí a sus próximos agentes y
             líderes comerciales.
           </p>
@@ -75,7 +75,7 @@ function Empresas() {
               </Link>
             </div>
           )}
-          <p className="mt-3 text-xs text-navy-foreground/60">
+          <p className="mt-3 text-xs text-muted-foreground">
             Acceso solo para cuentas de reclutador autorizadas.
           </p>
         </div>

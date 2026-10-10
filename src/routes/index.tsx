@@ -31,19 +31,19 @@ function Hero() {
   const go = (over?: { q?: string }) =>
     navigate({ to: "/jobs", search: { q: (over?.q ?? q) || undefined, ramo: ramo || undefined, loc: loc || undefined } });
   return (
-    <section className="bg-hero text-navy-foreground">
+    <section className="bg-hero text-foreground">
       <div className="mx-auto max-w-7xl px-4 pb-24 pt-20 md:px-6 md:pt-28">
         <div className="animate-fade-up max-w-3xl">
-          <span className="inline-flex rounded-full border border-navy-foreground/20 px-3 py-1 text-xs font-medium text-navy-foreground/80">Bolsa de trabajo 100% sector asegurador</span>
+          <span className="inline-flex rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">Bolsa de trabajo 100% sector asegurador</span>
           <h1 className="mt-5 text-balance text-4xl font-bold tracking-tight md:text-6xl">
-            Tu próxima carrera en <span className="bg-brand-gradient bg-clip-text text-transparent">seguros</span> empieza aquí.
+            Tu próxima carrera en <span className="text-primary">seguros</span> empieza aquí.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-navy-foreground/75">
+          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
             El punto de encuentro entre el talento experto y las mejores firmas del sector seguros.
           </p>
         </div>
         <form onSubmit={(e) => { e.preventDefault(); go(); }}
-          className="mt-10 grid gap-2 rounded-2xl bg-card p-2 text-card-foreground shadow-glow md:grid-cols-[1.4fr_1fr_1fr_auto]">
+          className="mt-10 grid gap-2 rounded-2xl bg-card p-2 text-card-foreground shadow-soft md:grid-cols-[1.4fr_1fr_1fr_auto]">
           <label className="flex items-center gap-2 rounded-xl px-3"><Briefcase className="h-4 w-4 text-muted-foreground" />
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cargo o palabra clave" className="h-12 w-full bg-transparent text-sm outline-none" /></label>
           <label className="flex items-center gap-2 rounded-xl px-3 md:border-l md:border-border"><Building2 className="h-4 w-4 text-muted-foreground" />
@@ -56,7 +56,7 @@ function Hero() {
         </form>
         <div className="mt-5 flex flex-wrap gap-2">
           {QUICK.map((t) => (
-            <button key={t} onClick={() => go({ q: t })} className="rounded-full border border-navy-foreground/20 px-3 py-1 text-xs text-navy-foreground/85 transition-colors hover:border-primary hover:text-primary">{t}</button>
+            <button key={t} onClick={() => go({ q: t })} className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary">{t}</button>
           ))}
         </div>
       </div>
@@ -123,10 +123,10 @@ function Landing() {
           <p className="mt-2 text-muted-foreground">Encuentra vacantes acordes a tu cédula y experiencia. Crea tu perfil una vez y postúlate en un clic.</p>
           <Link to="/jobs"><Button className="mt-6">Buscar empleo <ArrowRight className="ml-1.5 h-4 w-4" /></Button></Link>
         </div>
-        <div className="rounded-3xl bg-hero p-10 text-navy-foreground shadow-soft">
+        <div className="rounded-3xl border border-border bg-hero p-10 text-foreground shadow-soft">
           <Megaphone className="h-8 w-8 text-primary" />
           <h3 className="mt-4 text-2xl font-bold">Para empresas</h3>
-          <p className="mt-2 text-navy-foreground/75">Publica vacantes y accede al pool de talento certificado en seguros, con evaluación técnica incluida.</p>
+          <p className="mt-2 text-muted-foreground">Publica vacantes y accede al pool de talento certificado en seguros, con evaluación técnica incluida.</p>
           <Link to="/empresas"><Button className="mt-6">Publicar vacante <ArrowRight className="ml-1.5 h-4 w-4" /></Button></Link>
         </div>
       </section>
