@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 
-const themeBootScript = `document.documentElement.classList.remove('dark');`;
+const themeBootScript = `(() => { let saved; try { saved = localStorage.getItem('momento_theme'); } catch (_) {} const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const dark = saved === 'dark' || (saved !== 'light' && prefersDark); document.documentElement.classList.toggle('dark', dark); document.documentElement.style.colorScheme = dark ? 'dark' : 'light'; })();`;
 
 function NotFoundComponent() {
   return (

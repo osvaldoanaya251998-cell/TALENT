@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { LogOut, Search, FileText, Video, Loader2, Users, Inbox, UserCheck, Award, ExternalLink, Sparkles } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import momentoLogo from "@/assets/insurtalent-logo.png";
 import { useServerFn } from "@tanstack/react-start";
 import { summarizeCandidate } from "@/lib/summarize-candidate.functions";
@@ -244,6 +245,7 @@ function Admin() {
             <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Reclutamiento</span>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <ThemeToggle />
             <span className="hidden md:inline">{userEmail}</span>
             <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="mr-1.5 h-3.5 w-3.5" /> Salir</Button>
           </div>

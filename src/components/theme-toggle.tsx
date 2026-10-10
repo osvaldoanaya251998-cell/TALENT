@@ -7,14 +7,7 @@ export function useTheme() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("momento_theme");
-    const initial: "light" | "dark" =
-      saved === "dark" || saved === "light"
-        ? saved
-        : window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    setTheme(initial);
+    setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
     setMounted(true);
   }, []);
 
@@ -22,7 +15,8 @@ export function useTheme() {
     if (!mounted) return;
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("momento_theme", theme);
+    root.style.colorScheme = theme;
+    try { localStorage.setItem("momento_theme", theme); } catch { /* Storage can be unavailable in private browsing. */ }
   }, [theme, mounted]);
 
   return { theme, mounted, toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) };
@@ -34,7 +28,9 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label="Cambiar tema"
+      disabled={!mounted}
+      aria-label={theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}
+      title={theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}
       suppressHydrationWarning
       className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground hover:border-primary/50"
     >

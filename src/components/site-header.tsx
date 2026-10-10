@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/theme-toggle";
 import logo from "@/assets/insurtalent-logo.png";
 
 export function useSessionRole() {
@@ -98,6 +99,7 @@ export function SiteHeader() {
           {links}
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {s?.signedIn ? (
             <>
               {(s.recruiter || s.company) && (
