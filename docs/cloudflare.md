@@ -109,6 +109,17 @@ está enlazada desde el pie del sitio y muestra el mismo aviso que el perfil del
 candidato. El sitio no tiene una página de términos; no introduzcas un enlace
 inexistente en **Application terms of service link**.
 
+Si Google indica que la página principal no está registrada a tu nombre, abre
+Google Search Console con la misma cuenta que administra el proyecto de Google
+y añade una propiedad de tipo **URL prefix / Prefijo de URL** para la dirección
+completa del sitio. El archivo público
+`public/google7c866742e424c9de.html` corresponde a la verificación de este sitio.
+Después del despliegue puedes usar **Archivo HTML → Verificar**. Conserva ese
+archivo después de verificar la propiedad. La configuración de archivos estáticos
+conserva la extensión `.html`, de modo que la dirección del archivo responde sin
+redirigir a otra ruta. Google indica esperar 24 horas antes
+de reintentar la verificación de marca para que se actualicen sus sistemas.
+
 El secreto de Google se guarda únicamente en Supabase; no debe añadirse como una
 variable `VITE_` ni al repositorio. El registro y acceso con correo funcionan sin
 activar Google. El registro de empresa sigue usando correo para asignar el tipo

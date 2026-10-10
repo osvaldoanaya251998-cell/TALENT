@@ -4,5 +4,8 @@
   "compatibility_date": "2025-09-01",
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "assets": {
+    "html_handling": "none"
+  }
 }
