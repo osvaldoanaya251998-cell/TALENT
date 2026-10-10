@@ -15,7 +15,7 @@ export function RecruiterShell({
   const s = useSessionRole();
   const tabs = [
     { to: "/recruiter/dashboard", l: "Dashboard" },
-    { to: "/recruiter/candidates", l: "Candidatos (Kanban)" },
+    { to: "/recruiter/candidates", l: "Candidatos" },
     { to: "/recruiter/new-job", l: "Publicar vacante" },
     { to: "/admin", l: "Gestionar postulaciones" },
   ] as const;

@@ -218,6 +218,18 @@ assert.equal(
   id(20),
 );
 checks++;
+await db.exec("ALTER TABLE public.applications ADD COLUMN notas text;");
+await asUser(A);
+assert.equal((await db.query(`UPDATE public.applications SET notas='Entrevista martes' WHERE id='${id(40)}' RETURNING notas`)).rows[0].notas,'Entrevista martes');
+checks++;
+await asUser(B);
+assert.equal((await db.query(`UPDATE public.applications SET notas='Unauthorized' WHERE id='${id(40)}' RETURNING id`)).rows.length,0);
+checks++;
+assert.equal((await db.query(`SELECT notas FROM public.applications WHERE id='${id(40)}'`)).rows.length,0);
+checks++;
+await asUser(A);
+assert.equal((await db.query(`SELECT notas FROM public.applications WHERE id='${id(40)}'`)).rows[0].notas,'Entrevista martes');
+checks++;
 await db.close();
 console.log(
   `${checks} PostgreSQL checks passed: signup/backfill, repeatability, company isolation, CVs, status updates, public jobs, candidate and admin access.`,
