@@ -1,0 +1,43 @@
+import {PGlite} from '@electric-sql/pglite';
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const db=new PGlite();
+try {
+await db.exec(`CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role; CREATE SCHEMA auth; CREATE SCHEMA storage;
+CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,raw_user_meta_data jsonb DEFAULT '{}',email_confirmed_at timestamptz);
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+CREATE TABLE storage.objects(id uuid PRIMARY KEY,bucket_id text,name text);
+CREATE TABLE storage.buckets(id text PRIMARY KEY,name text,public boolean);
+CREATE FUNCTION storage.foldername(text) RETURNS text[] LANGUAGE sql AS $$SELECT string_to_array($1,'/')$$;
+GRANT USAGE ON SCHEMA public,auth,storage TO authenticated,anon;`);
+await db.exec(await readFile(new URL('../supabase/setup/nuevo-proyecto.sql',import.meta.url),'utf8'));
+const migration=await readFile(new URL('../supabase/migrations/20261010000000_direct_applications.sql',import.meta.url),'utf8');
+await db.exec(migration); // Safe to apply to an already configured project.
+const uid='00000000-0000-4000-8000-000000000021';
+await db.query(`INSERT INTO auth.users(id,email,raw_user_meta_data) VALUES($1,'candidate@example.test','{"role":"candidate","full_name":"Candidato"}')`,[uid]);
+await db.query(`UPDATE public.profiles SET nombre='Candidato',telefono='5551234567',ciudad='Mexico',cv_url=$2,accepted_privacy_policy=true,privacy_policy_version='v1',privacy_policy_accepted_at=now() WHERE user_id=$1`,[uid,`${uid}/cv.pdf`]);
+const vacancy=(await db.query('SELECT id FROM public.vacancies WHERE is_active LIMIT 1')).rows[0].id;
+const countBefore=(await db.query('SELECT count(*)::int AS n FROM public.evaluations')).rows[0].n;
+await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[uid]);
+await db.exec('SET ROLE authenticated;');
+const submit=()=>db.query('SELECT public.apply_to_vacancy($1) AS result',[vacancy]);
+const first=(await submit()).rows[0].result;
+assert.ok(first.application_id); assert.equal(first.reused,false);
+const second=(await submit()).rows[0].result;
+assert.equal(second.application_id,first.application_id);assert.equal(second.reused,true);
+const applications=(await db.query('SELECT * FROM public.applications')).rows;
+assert.equal(applications.length,1);assert.equal(applications[0].evaluation_id,null);assert.equal(applications[0].user_id,uid);
+await db.exec('RESET ROLE;');
+assert.equal((await db.query('SELECT count(*)::int AS n FROM public.evaluations')).rows[0].n,countBefore);
+assert.equal((await db.query('SELECT count(*)::int AS n FROM public.candidates')).rows[0].n,1);
+assert.equal((await db.query('SELECT cv_url FROM public.uploads')).rows[0].cv_url,`${uid}/cv.pdf`);
+await db.query("SELECT set_config('request.jwt.claim.sub','',false)");
+await assert.rejects(submit(),/not_authenticated/);
+await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[uid]);
+await db.query('UPDATE public.vacancies SET is_active=false WHERE id=$1',[vacancy]);
+await assert.rejects(submit(),/vacancy_unavailable/);
+await db.query('UPDATE public.vacancies SET is_active=true WHERE id=$1',[vacancy]);
+await db.query('UPDATE public.profiles SET accepted_privacy_policy=false WHERE user_id=$1',[uid]);
+await assert.rejects(submit(),/profile_incomplete/);
+console.log('Direct applications: success, deduplication, profile/CV, no evaluations, authentication, active vacancy and consent verified.');
+} finally {await db.close();}

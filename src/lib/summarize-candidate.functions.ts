@@ -19,49 +19,17 @@ export const summarizeCandidate = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!roleRow) throw new Response("Forbidden", { status: 403 });
 
-    // 2) Load application + candidate + evaluation
+    // 2) Load application and candidate
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: app, error: appErr } = await supabaseAdmin
       .from("applications")
       .select(
-        "id,respuestas,vacancy:vacancies(title,description),candidate:candidates(nombre,email,telefono,ciudad,linkedin,experiencia,uploads(cv_url)),evaluations!evaluations_application_id_fkey(id,percentage,score,compatibility,total_correct,total_questions,avg_time_ms,tab_switches,status)"
+        "id,respuestas,vacancy:vacancies(title,description),candidate:candidates(nombre,email,telefono,ciudad,linkedin,experiencia,uploads(cv_url))"
       )
       .eq("id", data.application_id)
       .maybeSingle();
     if (appErr || !app) throw new Response("Not found", { status: 404 });
-
-    const ev = (app as any).evaluations?.[0] ?? null;
-
-    let answers: any[] = [];
-    if (ev?.id) {
-      const { data: ans } = await supabaseAdmin
-        .from("evaluation_answers")
-        .select(
-          "is_correct,time_ms,selected_option,question:questions(question,category,skill_tags,correct_option,order_index)"
-        )
-        .eq("evaluation_id", ev.id);
-      answers = (ans as any[]) ?? [];
-      answers.sort((a, b) => (a.question?.order_index ?? 0) - (b.question?.order_index ?? 0));
-    }
-
-    // 3) Skill aggregation
-    const skillMap = new Map<string, { correct: number; total: number }>();
-    for (const a of answers) {
-      const tags: string[] = a.question?.skill_tags ?? [];
-      for (const t of tags) {
-        const cur = skillMap.get(t) ?? { correct: 0, total: 0 };
-        cur.total++;
-        if (a.is_correct) cur.correct++;
-        skillMap.set(t, cur);
-      }
-    }
-    const skills = Array.from(skillMap.entries()).map(([skill, v]) => ({
-      skill,
-      correct: v.correct,
-      total: v.total,
-      pct: v.total ? Math.round((v.correct / v.total) * 100) : 0,
-    }));
 
     // 4) Attempt to download CV as base64
     const cvPath: string | undefined = (app as any).candidate?.uploads?.[0]?.cv_url;
@@ -100,14 +68,6 @@ export const summarizeCandidate = createServerFn({ method: "POST" })
     // 5) Build prompt
     const cand = (app as any).candidate ?? {};
     const vac = (app as any).vacancy ?? {};
-    const perf = ev
-      ? `Calificación: ${Number(ev.percentage ?? 0).toFixed(0)}% · Puntaje: ${ev.score ?? 0}/100 · Aciertos: ${ev.total_correct}/${ev.total_questions} · Tiempo prom.: ${(ev.avg_time_ms / 1000).toFixed(1)}s · Compatibilidad: ${ev.compatibility ?? "—"} · Cambios de pestaña: ${ev.tab_switches ?? 0}`
-      : "Evaluación aún no completada.";
-
-    const skillsText = skills.length
-      ? skills.map((s) => `- ${s.skill}: ${s.correct}/${s.total} (${s.pct}%)`).join("\n")
-      : "Sin desglose por habilidad.";
-
     const respuestasText = Object.entries(app.respuestas ?? {})
       .map(([k, v]) => `- ${k}: ${String(v)}`)
       .join("\n");
@@ -127,9 +87,6 @@ Devuelve SOLO Markdown con exactamente estas secciones y encabezados (usa ## par
 ## Áreas de oportunidad
 - 2-4 bullets muy breves.
 
-## Desempeño en la evaluación
-2-3 líneas interpretando velocidad, precisión y compatibilidad.
-
 ## Recomendación
 Una sola línea: **Avanzar**, **Entrevistar** o **Descartar** — y por qué en máx. 15 palabras.`;
 
@@ -143,12 +100,6 @@ LinkedIn: ${cand.linkedin ?? "—"}
 
 Respuestas de postulación:
 ${respuestasText || "—"}
-
-Resultados de la evaluación:
-${perf}
-
-Desglose por habilidad:
-${skillsText}
 
 ${cvPart ? "Adjunto el CV en PDF para que extraigas experiencia relevante." : "No se adjunta CV; basa el perfil sólo en los datos anteriores."}`,
       },

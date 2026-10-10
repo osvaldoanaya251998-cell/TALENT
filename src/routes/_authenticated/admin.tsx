@@ -30,27 +30,6 @@ const STATUS: { v: Status; l: string; color: string }[] = [
   { v: "contratado", l: "Contratado", color: "bg-primary/20 text-primary border-primary/40" },
 ];
 
-type Evaluation = {
-  id: string; status: string; total_questions: number; total_correct: number;
-  avg_time_ms: number; percentage: number | string | null; score: number | null;
-  compatibility: string | null; tab_switches: number | null;
-};
-
-type EvalAnswer = {
-  question_id: string;
-  answer_text: string | null;
-  selected_option: string | null;
-  is_correct: boolean;
-  time_ms: number;
-  question: {
-    question: string; category: string; order_index: number;
-    correct_option: string | null;
-    option_a: string | null; option_b: string | null; option_c: string | null; option_d: string | null;
-    skill_tags: string[] | null;
-  } | null;
-};
-
-
 type Vacancy = { id: string; title: string };
 
 type Row = {
@@ -65,7 +44,6 @@ type Row = {
     uploads: { cv_url: string | null; video_url: string | null }[];
   } | null;
 
-  evaluations: Evaluation[];
 };
 
 function getCandidateInfo(row: Row) {
@@ -81,7 +59,7 @@ function getCandidateInfo(row: Row) {
   };
 }
 
-type SortMode = "answered_desc" | "date_desc" | "date_asc" | "time_asc";
+type SortMode = "date_desc" | "date_asc";
 type DateRange = "all" | "7d" | "30d" | "90d";
 
 function Admin() {
@@ -92,7 +70,6 @@ function Admin() {
   const [filter, setFilter] = useState<Status | "all">("all");
   const [selected, setSelected] = useState<Row | null>(null);
   const [urls, setUrls] = useState<{ cv?: string; video?: string }>({});
-  const [answers, setAnswers] = useState<EvalAnswer[]>([]);
   const [userEmail, setUserEmail] = useState("");
   const [aiSummary, setAiSummary] = useState<string>("");
   const [aiLoading, setAiLoading] = useState(false);
@@ -119,7 +96,7 @@ function Admin() {
   const load = async () => {
     const { data, error } = await supabase
       .from("applications")
-      .select("id,status,respuestas,created_at,vacancy_id,vacancy:vacancies(id,title),candidate:candidates(id,nombre,email,telefono,ciudad,linkedin,experiencia,uploads(cv_url,video_url)),evaluations!evaluations_application_id_fkey(id,status,total_questions,total_correct,avg_time_ms,percentage,score,compatibility,tab_switches)")
+      .select("id,status,respuestas,created_at,vacancy_id,vacancy:vacancies(id,title),candidate:candidates(id,nombre,email,telefono,ciudad,linkedin,experiencia,uploads(cv_url,video_url))")
       .order("created_at", { ascending: false });
     if (error) { toast.error(error.message); return; }
     setRows((data as unknown as Row[]) ?? []);
@@ -145,14 +122,7 @@ function Admin() {
       .sort((a, b) => {
         if (sortMode === "date_desc") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         if (sortMode === "date_asc") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-        if (sortMode === "time_asc") {
-          const ta = Number(a.evaluations?.[0]?.avg_time_ms ?? Number.MAX_SAFE_INTEGER);
-          const tb = Number(b.evaluations?.[0]?.avg_time_ms ?? Number.MAX_SAFE_INTEGER);
-          return ta - tb;
-        }
-        const sa = a.evaluations?.[0]?.total_correct ?? -1;
-        const sb = b.evaluations?.[0]?.total_correct ?? -1;
-        return sb - sa;
+        return 0;
       });
   }, [rows, search, filter, vacancyFilter, sortMode, dateRange]);
 
@@ -173,7 +143,6 @@ function Admin() {
   const openDetail = async (r: Row) => {
     setSelected(r);
     setUrls({});
-    setAnswers([]);
     setAiSummary("");
     const up = getCandidateInfo(r).uploads?.[0];
     const links: { cv?: string; video?: string } = {};
@@ -186,20 +155,7 @@ function Admin() {
       if (data) links.video = data.signedUrl;
     }
     setUrls(links);
-    const ev = r.evaluations?.[0];
-    if (ev?.id) {
-      const { data: ans } = await supabase
-        .from("evaluation_answers")
-        .select("question_id,answer_text,selected_option,is_correct,time_ms,question:questions(question,category,order_index,correct_option,option_a,option_b,option_c,option_d,skill_tags)")
-        .eq("evaluation_id", ev.id);
-      const list = ((ans as unknown as EvalAnswer[]) ?? []).sort(
-        (a, b) => (a.question?.order_index ?? 0) - (b.question?.order_index ?? 0),
-      );
-      setAnswers(list);
-
-    }
   };
-
 
   const generateSummary = async () => {
     if (!selected) return;
@@ -308,15 +264,13 @@ function Admin() {
             <SelectContent>
               <SelectItem value="date_desc">Más recientes</SelectItem>
               <SelectItem value="date_asc">Más antiguos</SelectItem>
-              <SelectItem value="answered_desc">Más respuestas</SelectItem>
-              <SelectItem value="time_asc">Tiempo promedio ↑</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="overflow-hidden rounded-xl border border-border bg-card">
-          <div className="grid grid-cols-[0.3fr_1.5fr_1.1fr_0.6fr_1fr_0.7fr] gap-4 border-b border-border bg-background/40 px-5 py-3 text-xs uppercase tracking-wider text-muted-foreground">
-            <div>#</div><div>Candidato</div><div>Vacante</div><div>Exp.</div><div>Evaluación</div><div>Estatus</div>
+          <div className="grid grid-cols-[0.3fr_1.5fr_1.1fr_0.6fr_0.7fr] gap-4 border-b border-border bg-background/40 px-5 py-3 text-xs uppercase tracking-wider text-muted-foreground">
+            <div>#</div><div>Candidato</div><div>Vacante</div><div>Exp.</div><div>Estatus</div>
           </div>
           {rows === null ? (
             <div className="flex items-center justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
@@ -324,14 +278,10 @@ function Admin() {
             <div className="py-16 text-center text-sm text-muted-foreground">No hay candidatos.</div>
           ) : filtered.map((r, i) => {
             const st = STATUS.find((s) => s.v === r.status)!;
-            const ev = r.evaluations?.[0];
             const candidate = getCandidateInfo(r);
-            const answered = ev?.total_correct ?? 0;
-            const total = ev?.total_questions ?? 0;
-            const avgSec = ev && ev.avg_time_ms > 0 ? (ev.avg_time_ms / 1000).toFixed(0) : null;
             const date = new Date(r.created_at).toLocaleDateString("es-MX", { day: "2-digit", month: "short" });
             return (
-              <button key={r.id} onClick={() => openDetail(r)} className="grid w-full grid-cols-[0.3fr_1.5fr_1.1fr_0.6fr_1fr_0.7fr] gap-4 border-b border-border px-5 py-4 text-left text-sm transition-colors hover:bg-accent/50 last:border-0">
+              <button key={r.id} onClick={() => openDetail(r)} className="grid w-full grid-cols-[0.3fr_1.5fr_1.1fr_0.6fr_0.7fr] gap-4 border-b border-border px-5 py-4 text-left text-sm transition-colors hover:bg-accent/50 last:border-0">
                 <div className="font-semibold tabular-nums text-muted-foreground">#{i + 1}</div>
                 <div className="min-w-0">
                   <div className="truncate font-medium">{candidate.nombre}</div>
@@ -342,17 +292,6 @@ function Admin() {
                   <div className="text-[10px] text-muted-foreground">{date}</div>
                 </div>
                 <div className="text-muted-foreground">{candidate.experiencia}a</div>
-                <div className="tabular-nums">
-                  {!ev ? <span className="text-xs text-muted-foreground">Pendiente</span> : (
-                    <>
-                      <span className="font-semibold text-primary">{Number(ev.percentage ?? 0).toFixed(0)}%</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {answered}/{total} · {ev.score ?? 0}pts{avgSec ? ` · ${avgSec}s` : ""}
-                      </span>
-                    </>
-                  )}
-                </div>
-
                 <div><Badge variant="outline" className={st.color}>{st.l}</Badge></div>
               </button>
             );
@@ -391,7 +330,7 @@ function Admin() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-foreground">Resumen IA del perfil</div>
-                        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">CV + desempeño en evaluación</div>
+                        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">CV y experiencia profesional</div>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" onClick={generateSummary} disabled={aiLoading} className="border-primary/40">
@@ -420,7 +359,7 @@ function Admin() {
                     </div>
                   ) : (
                     <p className="relative text-xs text-muted-foreground">
-                      Genera un análisis con IA a partir del CV y del desempeño en la evaluación para identificar rápidamente el perfil, fortalezas y encaje del candidato.
+                      Genera un análisis con IA a partir del CV y de la experiencia profesional para identificar rápidamente el perfil, fortalezas y encaje del candidato.
                     </p>
                   )}
                 </div>
@@ -433,180 +372,6 @@ function Admin() {
                     <SelectContent>{STATUS.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-
-                {(() => {
-                  const ev = selected.evaluations?.[0];
-                  if (!ev) return (
-                    <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                      Este candidato aún no ha completado la evaluación por competencias.
-                    </div>
-                  );
-                  const correct = ev.total_correct ?? 0;
-                  const total = ev.total_questions ?? 0;
-                  const incorrect = Math.max(0, total - correct);
-                  const pct = Number(ev.percentage ?? 0);
-                  const avgSec = ev.avg_time_ms > 0 ? (ev.avg_time_ms / 1000).toFixed(1) : "—";
-                  const totalSec = answers.reduce((s, a) => s + (a.time_ms || 0), 0) / 1000;
-                  const wrong = answers.filter((a) => !a.is_correct);
-                  const optText = (a: EvalAnswer, letter: string | null) => {
-                    if (!letter || !a.question) return "—";
-                    const map: Record<string, string | null | undefined> = {
-                      A: a.question.option_a, B: a.question.option_b,
-                      C: a.question.option_c, D: a.question.option_d,
-                    };
-                    return `${letter}) ${map[letter] ?? "—"}`;
-                  };
-                  // Aggregate strengths / gaps per skill tag
-                  const skillMap = new Map<string, { correct: number; total: number }>();
-                  answers.forEach((a) => {
-                    const tags = a.question?.skill_tags ?? [];
-                    tags.forEach((t) => {
-                      const cur = skillMap.get(t) ?? { correct: 0, total: 0 };
-                      cur.total += 1;
-                      if (a.is_correct) cur.correct += 1;
-                      skillMap.set(t, cur);
-                    });
-                  });
-                  const skillRows = Array.from(skillMap.entries())
-                    .map(([skill, v]) => ({ skill, ...v, pct: v.total ? Math.round((v.correct / v.total) * 100) : 0 }))
-                    .sort((a, b) => b.pct - a.pct);
-                  const strengths = skillRows.filter((s) => s.pct >= 70);
-                  const gaps = skillRows.filter((s) => s.pct < 50);
-                  return (
-                    <div className="rounded-xl border border-border bg-background/40 p-5">
-                      <div className="mb-4 flex items-center justify-between">
-                        <div className="text-xs uppercase tracking-wider text-muted-foreground">Evaluación técnica</div>
-                        <div className="flex items-center gap-2">
-                          {ev.tab_switches && ev.tab_switches > 0 ? (
-                            <Badge variant="outline" className="border-yellow-500/40 bg-yellow-500/10 text-yellow-500">
-                              {ev.tab_switches} cambio(s) de pestaña
-                            </Badge>
-                          ) : null}
-                          <Badge variant="outline" className="border-border capitalize">{ev.compatibility ?? ev.status}</Badge>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-                        <div><div className="text-xs text-muted-foreground">Calificación</div><div className="text-2xl font-semibold tabular-nums text-primary">{pct.toFixed(0)}%</div></div>
-                        <div><div className="text-xs text-muted-foreground">Puntaje</div><div className="text-2xl font-semibold tabular-nums">{ev.score ?? 0}<span className="text-sm text-muted-foreground">/100</span></div></div>
-                        <div><div className="text-xs text-muted-foreground">Aciertos</div><div className="text-2xl font-semibold tabular-nums text-emerald-500">{correct}</div></div>
-                        <div><div className="text-xs text-muted-foreground">Errores</div><div className="text-2xl font-semibold tabular-nums text-red-500">{incorrect}</div></div>
-                        <div><div className="text-xs text-muted-foreground">Tiempo prom.</div><div className="text-2xl font-semibold tabular-nums">{avgSec}s</div></div>
-                      </div>
-                      <div className="mt-3 text-xs text-muted-foreground">
-                        Tiempo total utilizado: <span className="tabular-nums text-foreground">{totalSec.toFixed(0)}s</span>
-                      </div>
-
-                      {skillRows.length > 0 && (
-                        <div className="mt-6 space-y-4">
-                          <div className="text-xs uppercase tracking-wider text-muted-foreground">Habilidades comerciales</div>
-                          <div className="space-y-2">
-                            {skillRows.map((s) => {
-                              const tone = s.pct >= 70 ? "emerald" : s.pct >= 50 ? "yellow" : "red";
-                              const barColor = tone === "emerald" ? "bg-emerald-500" : tone === "yellow" ? "bg-yellow-500" : "bg-red-500";
-                              const textColor = tone === "emerald" ? "text-emerald-500" : tone === "yellow" ? "text-yellow-500" : "text-red-500";
-                              return (
-                                <div key={s.skill} className="rounded-lg border border-border bg-card p-3">
-                                  <div className="mb-1.5 flex items-center justify-between text-xs">
-                                    <span className="font-medium">{s.skill}</span>
-                                    <span className={`tabular-nums ${textColor}`}>{s.correct}/{s.total} · {s.pct}%</span>
-                                  </div>
-                                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                                    <div className={`h-full ${barColor}`} style={{ width: `${s.pct}%` }} />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          <div className="grid gap-3 md:grid-cols-2">
-                            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
-                              <div className="mb-2 text-[10px] uppercase tracking-wider text-emerald-500">Fortalezas</div>
-                              {strengths.length === 0 ? (
-                                <div className="text-xs text-muted-foreground">Sin habilidades ≥ 70%.</div>
-                              ) : (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {strengths.map((s) => (
-                                    <Badge key={s.skill} variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-500">
-                                      {s.skill} · {s.pct}%
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
-                              <div className="mb-2 text-[10px] uppercase tracking-wider text-red-500">Brechas</div>
-                              {gaps.length === 0 ? (
-                                <div className="text-xs text-muted-foreground">Sin brechas relevantes.</div>
-                              ) : (
-                                <div className="flex flex-wrap gap-1.5">
-                                  {gaps.map((s) => (
-                                    <Badge key={s.skill} variant="outline" className="border-red-500/40 bg-red-500/10 text-red-500">
-                                      {s.skill} · {s.pct}%
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {wrong.length > 0 && (
-                        <div className="mt-6 space-y-3">
-                          <div className="text-xs uppercase tracking-wider text-muted-foreground">Preguntas incorrectas ({wrong.length})</div>
-                          {wrong.map((a) => (
-                            <div key={a.question_id} className="rounded-lg border border-red-500/30 bg-red-500/5 p-4">
-                              <div className="mb-1 flex items-center justify-between gap-2">
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  <div className="text-[10px] uppercase tracking-wider text-red-500">{a.question?.category ?? "—"}</div>
-                                  {(a.question?.skill_tags ?? []).map((t) => (
-                                    <Badge key={t} variant="outline" className="border-border bg-background/60 text-[10px] font-normal">{t}</Badge>
-                                  ))}
-                                </div>
-                                <div className="text-[10px] text-muted-foreground tabular-nums">#{(a.question?.order_index ?? 0)} · {(a.time_ms / 1000).toFixed(0)}s</div>
-                              </div>
-                              <div className="text-xs font-medium">{a.question?.question}</div>
-                              <div className="mt-2 space-y-1 text-xs">
-                                <div className="text-red-500">Seleccionó: <span className="font-medium">{optText(a, a.selected_option)}</span></div>
-                                <div className="text-emerald-500">Correcta: <span className="font-medium">{optText(a, a.question?.correct_option ?? null)}</span></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {answers.length > 0 && (
-                        <details className="mt-6 rounded-lg border border-border bg-card">
-                          <summary className="cursor-pointer px-4 py-3 text-xs uppercase tracking-wider text-muted-foreground">
-                            Ver las {answers.length} respuestas completas
-                          </summary>
-                          <div className="space-y-2 border-t border-border p-4">
-                            {answers.map((a, idx) => (
-                              <div key={a.question_id} className={`rounded-md border p-3 text-xs ${a.is_correct ? "border-emerald-500/30 bg-emerald-500/5" : "border-red-500/30 bg-red-500/5"}`}>
-                                <div className="mb-1 flex items-center justify-between gap-2">
-                                  <div className="flex flex-wrap items-center gap-1.5">
-                                    <span className="font-medium">#{idx + 1} · {a.question?.category}</span>
-                                    {(a.question?.skill_tags ?? []).map((t) => (
-                                      <Badge key={t} variant="outline" className="border-border bg-background/60 text-[10px] font-normal">{t}</Badge>
-                                    ))}
-                                  </div>
-                                  <span className={`tabular-nums ${a.is_correct ? "text-emerald-500" : "text-red-500"}`}>
-                                    {a.is_correct ? "✓" : "✗"} {(a.time_ms / 1000).toFixed(0)}s
-                                  </span>
-                                </div>
-                                <div className="text-muted-foreground">{a.question?.question}</div>
-                                <div className="mt-1">
-                                  Selección: <span className="font-medium">{a.selected_option ?? "—"}</span>
-                                  {" · "}Correcta: <span className="font-medium">{a.question?.correct_option ?? "—"}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </details>
-                      )}
-                    </div>
-                  );
-
-                })()}
 
                 <div>
                   <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Respuestas</div>

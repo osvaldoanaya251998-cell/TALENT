@@ -126,7 +126,7 @@ function Landing() {
         <div className="rounded-3xl border border-border bg-hero p-10 text-foreground shadow-soft">
           <Megaphone className="h-8 w-8 text-primary" />
           <h3 className="mt-4 text-2xl font-bold">Para empresas</h3>
-          <p className="mt-2 text-muted-foreground">Publica vacantes y accede al pool de talento certificado en seguros, con evaluación técnica incluida.</p>
+          <p className="mt-2 text-muted-foreground">Publica vacantes y accede al talento del sector seguros y revisa sus perfiles y CV.</p>
           <Link to="/empresas"><Button className="mt-6">Publicar vacante <ArrowRight className="ml-1.5 h-4 w-4" /></Button></Link>
         </div>
       </section>

@@ -10,7 +10,7 @@ export const Route = createFileRoute("/empresas")({
       {
         name: "description",
         content:
-          "Publica vacantes del sector seguros, evalúa candidatos automáticamente y gestiona tu pipeline en un tablero Kanban.",
+          "Publica vacantes del sector seguros, recibe perfiles y CV y gestiona tu pipeline en un tablero Kanban.",
       },
       { property: "og:title", content: "Para empresas — InsurTalent" },
       {
@@ -34,8 +34,8 @@ function Empresas() {
     },
     {
       i: Users,
-      t: "Evaluación técnica automática",
-      d: "Cada candidato presenta un examen por competencias con puntaje y compatibilidad.",
+      t: "Perfiles y CV de candidatos",
+      d: "Revisa la experiencia, certificaciones y CV de quienes se postulan a tus vacantes.",
     },
     {
       i: KanbanSquare,

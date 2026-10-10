@@ -17,7 +17,7 @@ export function RecruiterShell({
     { to: "/recruiter/dashboard", l: "Dashboard" },
     { to: "/recruiter/candidates", l: "Candidatos (Kanban)" },
     { to: "/recruiter/new-job", l: "Publicar vacante" },
-    { to: "/admin", l: "Rankings y evaluaciones" },
+    { to: "/admin", l: "Gestionar postulaciones" },
   ] as const;
   return (
     <div className="min-h-screen bg-background text-foreground">

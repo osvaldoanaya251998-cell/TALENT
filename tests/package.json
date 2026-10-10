@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node company-registration.mjs",
-    "test:browser": "node --test company-registration.browser.test.mjs"
+    "test": "node company-registration.mjs && node direct-applications.mjs",
+    "test:browser": "node --test company-registration.browser.test.mjs direct-applications.browser.test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

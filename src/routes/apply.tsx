@@ -31,6 +31,7 @@ function Apply() {
   const [vacancy, setVacancy] = useState<VacancyRow | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -76,20 +77,10 @@ function Apply() {
     try {
       const { data, error } = await supabase.rpc("apply_to_vacancy", { _vacancy_id: vacancy.id });
       if (error) throw error;
-      const result = data as { evaluation_id: string; completed: boolean; reused: boolean } | null;
-      if (!result?.evaluation_id) throw new Error("No se pudo crear la postulación");
-
-      sessionStorage.setItem("momento_evaluation_id", result.evaluation_id);
-      sessionStorage.setItem("momento_vacancy_id", vacancy.id);
-      if (profile?.nombre) sessionStorage.setItem("momento_candidate_name", profile.nombre);
-
-      if (result.completed) {
-        toast.success("Ya tienes una evaluación completada. Reutilizamos tu resultado.");
-        navigate({ to: "/evaluation-result", search: { id: result.evaluation_id }, replace: true });
-      } else {
-        toast.success("Postulación creada. Iniciando evaluación…");
-        navigate({ to: "/evaluation", replace: true });
-      }
+      const result = data as { application_id?: string } | null;
+      if (!result?.application_id) throw new Error("No se pudo crear la postulación");
+      setSubmitted(true);
+      toast.success("Postulación enviada. La empresa ya puede revisar tu perfil y CV.");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "No se pudo aplicar";
       if (msg.includes("profile_incomplete")) {
@@ -139,6 +130,17 @@ function Apply() {
           </Link>
         </div>
 
+        {submitted ? (
+          <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-soft" role="status">
+            <CheckCircle2 className="mx-auto h-10 w-10 text-primary" />
+            <h1 className="mt-4 text-2xl font-semibold">Postulación enviada</h1>
+            <p className="mt-2 text-muted-foreground">La empresa ya puede revisar tu perfil y CV para esta vacante.</p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link to="/jobs"><Button>Buscar más empleos</Button></Link>
+              <Link to="/profile"><Button variant="outline">Ver mi perfil</Button></Link>
+            </div>
+          </div>
+        ) : (
         <div className="rounded-2xl border border-border bg-card p-8 shadow-soft animate-fade-up">
           <h1 className="text-2xl font-semibold tracking-tight">Postulación rápida</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -184,6 +186,7 @@ function Apply() {
             </Button>
           </div>
         </div>
+        )}
       </main>
     </div>
   );
