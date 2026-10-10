@@ -113,6 +113,13 @@
 @layer base {
   * { border-color: var(--color-border); }
   html, body { background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-display); }
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+  select { color-scheme: inherit; }
+  select option, select optgroup {
+    background-color: var(--card);
+    color: var(--card-foreground);
+  }
   body { font-feature-settings: "ss01","cv11"; -webkit-font-smoothing: antialiased; }
   ::selection { background: rgba(62,189,173,0.28); }
 }
