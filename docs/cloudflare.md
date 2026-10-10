@@ -101,6 +101,14 @@ en Cloudflare.
 5. Guarda el proveedor en Supabase. La dirección de retorno a Cloudflare ya debe
    estar autorizada en **URL Configuration**, como se explica arriba.
 
+Si el botón **Publish app** aparece deshabilitado y pide completar **Branding**,
+revisa los campos obligatorios y guarda la configuración. Usa la dirección real
+de Cloudflare como **Application home page** y esa misma dirección seguida de
+`/privacidad` como **Application privacy policy link**. Esta página es pública,
+está enlazada desde el pie del sitio y muestra el mismo aviso que el perfil del
+candidato. El sitio no tiene una página de términos; no introduzcas un enlace
+inexistente en **Application terms of service link**.
+
 El secreto de Google se guarda únicamente en Supabase; no debe añadirse como una
 variable `VITE_` ni al repositorio. El registro y acceso con correo funcionan sin
 activar Google. El registro de empresa sigue usando correo para asignar el tipo

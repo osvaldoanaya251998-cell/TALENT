@@ -150,13 +150,16 @@ export function SiteFooter() {
           El punto de encuentro entre el talento experto y las mejores firmas del sector seguros. ©{" "}
           {new Date().getFullYear()}
         </p>
-        <Link
-          to="/auth"
-          search={{ role: "company", mode: "login" }}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          Acceso empresas
-        </Link>
+        <div className="flex shrink-0 items-center gap-4 text-xs text-muted-foreground">
+          <Link to="/privacidad" className="hover:text-foreground">Aviso de privacidad</Link>
+          <Link
+            to="/auth"
+            search={{ role: "company", mode: "login" }}
+            className="hover:text-foreground"
+          >
+            Acceso empresas
+          </Link>
+        </div>
       </div>
     </footer>
   );
