@@ -335,3 +335,56 @@ test("Signup does not impose character composition or length in the form", async
     assert.equal(requests[0].body.password,"abc");
   } finally { await context.close(); }
 });
+
+for (const scenario of [
+  {
+    role: "candidate",
+    search: "?next=%2Fapply&vacancy=test-vacancy",
+    callbackNext: "/apply?vacancy=test-vacancy",
+    expected: "/apply?vacancy=test-vacancy",
+  },
+  {
+    role: "company",
+    search: "?role=company&mode=login",
+    callbackNext: "/profile",
+    expected: "/recruiter/dashboard",
+  },
+]) {
+  test(`Google uses Supabase OAuth and returns ${scenario.role} to ${scenario.expected}`, async () => {
+    const { page, context } = await openAuth({
+      loginRole: scenario.role,
+      search: scenario.search,
+      authorizedCompany: true,
+    });
+    const authorizations = [];
+    try {
+      // Simulate the provider round trip without contacting Google or real Supabase.
+      await context.route(/\/auth\/v1\/authorize\?/, async (route) => {
+        const url = new URL(route.request().url());
+        authorizations.push(url);
+        const callback = new URL(url.searchParams.get("redirect_to"));
+        const session = makeSession(makeUser(scenario.role));
+        callback.hash = new URLSearchParams({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          token_type: "bearer",
+          expires_in: "3600",
+        }).toString();
+        await route.fulfill({ status: 302, headers: { location: callback.href }, body: "" });
+      });
+      await page.getByRole("button", { name: "Continuar con Google", exact: true }).click();
+      await page.waitForURL(`${origin}${scenario.expected}`);
+      assert.equal(authorizations.length, 1);
+      assert.notEqual(authorizations[0].origin, origin);
+      assert.match(authorizations[0].hostname, /\.supabase\.co$/);
+      assert.equal(authorizations[0].searchParams.get("provider"), "google");
+      const callback = new URL(authorizations[0].searchParams.get("redirect_to"));
+      assert.equal(callback.origin, origin);
+      assert.equal(callback.pathname, "/auth/callback");
+      assert.equal(callback.searchParams.get("next"), scenario.callbackNext);
+      assert.equal(await page.evaluate(() => sessionStorage.getItem("momento_post_auth_redirect")), null);
+    } finally {
+      await context.close();
+    }
+  });
+}

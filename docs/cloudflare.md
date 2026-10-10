@@ -82,9 +82,29 @@ Comprueba el registro de candidato y de empresa, la confirmación por correo y
 el inicio de sesión. En el panel de empresa comprueba que al pulsar un candidato
 se abre su resumen y que las notas siguen allí después de recargar.
 
-El acceso con Google utiliza actualmente el proveedor de Lovable. Su autorización
-para el nuevo dominio debe comprobarse por separado; configurar estas variables
-no cambia ese proveedor. El registro y acceso con correo usan Supabase.
+## Activar el acceso con Google
+
+El botón de Google usa directamente Supabase Auth. El proyecto debe tener
+habilitado ese proveedor; las rutas `/~oauth/initiate` de Lovable no se utilizan
+en Cloudflare.
+
+1. En Supabase entra en **Authentication → Sign In / Providers → Google**.
+2. Activa el proveedor e introduce el **Client ID** y **Client Secret** de un
+   cliente OAuth de tipo **Web application** de Google Cloud.
+3. En el cliente de Google, añade como **Authorized redirect URI** la dirección
+   que muestra Supabase, con este formato:
+   `https://<id-del-proyecto>.supabase.co/auth/v1/callback`.
+4. Configura la pantalla de consentimiento de Google. Si la aplicación sigue en
+   modo de pruebas, añade los correos que vayan a probarla como usuarios de prueba.
+   Para aceptar usuarios externos al grupo de prueba, publica la aplicación de
+   Google y completa los requisitos que Google indique.
+5. Guarda el proveedor en Supabase. La dirección de retorno a Cloudflare ya debe
+   estar autorizada en **URL Configuration**, como se explica arriba.
+
+El secreto de Google se guarda únicamente en Supabase; no debe añadirse como una
+variable `VITE_` ni al repositorio. El registro y acceso con correo funcionan sin
+activar Google. El registro de empresa sigue usando correo para asignar el tipo
+de cuenta; el acceso con Google respeta el tipo de una cuenta existente.
 
 ## Comprobaciones locales
 

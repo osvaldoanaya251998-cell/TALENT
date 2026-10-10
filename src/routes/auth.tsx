@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -181,15 +180,16 @@ function AuthPage() {
     try {
       // Preserve intended destination through the OAuth round-trip.
       savePostAuthRedirect({ next: dest, vacancy });
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/auth/callback",
+      const callbackNext = buildPostAuthRedirectPath({ next: dest, vacancy });
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(callbackNext)}`,
+        },
       });
-      if (result.error) {
-        toast.error(result.error.message || "No se pudo iniciar sesión con Google");
-        return;
-      }
-      if (result.redirected) return;
-      await goAfterAuth();
+      if (error) throw error;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo iniciar sesión con Google");
     } finally {
       setLoading(false);
     }
