@@ -1,3 +1,5 @@
+import { LanguageSelector } from "@/components/language-selector";
+import { useLanguage } from "@/lib/i18n/provider";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +35,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { tr } = useLanguage();
   const navigate = useNavigate();
   const { next, vacancy, role: requestedRole, mode: requestedMode } = Route.useSearch();
   const initialRole = requestedRole ?? (next?.startsWith("/recruiter/") ? "company" : "candidate");
@@ -140,7 +143,7 @@ function AuthPage() {
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "signup" && password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden. Escríbelas iguales.");
+      toast.error(tr("Las contraseñas no coinciden. Escríbelas iguales."));
       return;
     }
     setLoading(true);
@@ -157,14 +160,14 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-          toast.success("Cuenta creada. Revisa tu correo para confirmar tu cuenta.");
+          toast.success(tr("Cuenta creada. Revisa tu correo para confirmar tu cuenta."));
           return;
         }
-        toast.success("Cuenta creada. Bienvenido a InsurTalent.");
+        toast.success(tr("Cuenta creada. Bienvenido a InsurTalent."));
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Bienvenido de vuelta");
+        toast.success(tr("Bienvenido de vuelta"));
       }
       await goAfterAuth();
     } catch (err) {
@@ -200,7 +203,7 @@ function AuthPage() {
       <div className="flex min-h-screen items-center justify-center bg-hero px-6 text-foreground">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          Confirmando sesión…
+          {tr("Confirmando sesión…")}
         </div>
       </div>
     );
@@ -209,31 +212,40 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero px-6">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-soft">
+        <div className="mb-4 flex justify-end">
+          <LanguageSelector />
+        </div>
         <Link to="/" className="mb-6 inline-flex items-center gap-2">
           <img src={momentoLogo} alt="InsurTalent" className="h-6 w-6" />
-          <span className="text-sm font-semibold">InsurTalent Careers</span>
+          <span className="text-sm font-semibold">{tr("InsurTalent Careers")}</span>
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight">
           {mode === "signup"
             ? role === "company"
-              ? "Crea tu cuenta de empresa"
-              : "Crea tu perfil de candidato"
+              ? tr("Crea tu cuenta de empresa")
+              : tr("Crea tu perfil de candidato")
             : role === "company"
-              ? "Acceso para empresas"
-              : "Bienvenido de vuelta"}
+              ? tr("Acceso para empresas")
+              : tr("Bienvenido de vuelta")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {mode === "signup"
             ? role === "company"
-              ? "Registra tu empresa para acceder al panel de reclutamiento."
-              : "Regístrate una sola vez y aplica a todas las vacantes sin volver a llenar formularios."
+              ? tr("Registra tu empresa para acceder al panel de reclutamiento.")
+              : tr(
+                  "Regístrate una sola vez y aplica a todas las vacantes sin volver a llenar formularios.",
+                )
             : role === "company"
-              ? "Inicia sesión para entrar al panel de tu empresa."
-              : "Accede a tu perfil y postúlate al instante."}
+              ? tr("Inicia sesión para entrar al panel de tu empresa.")
+              : tr("Accede a tu perfil y postúlate al instante.")}
         </p>
 
         {
-          <div className="mt-6 grid grid-cols-2 gap-2" role="group" aria-label="Tipo de cuenta">
+          <div
+            className="mt-6 grid grid-cols-2 gap-2"
+            role="group"
+            aria-label={tr("Tipo de cuenta")}
+          >
             <Button
               type="button"
               variant={role === "candidate" ? "default" : "outline"}
@@ -241,7 +253,7 @@ function AuthPage() {
               disabled={loading}
               onClick={() => setRole("candidate")}
             >
-              Candidato
+              {tr("Candidato")}
             </Button>
             <Button
               type="button"
@@ -250,7 +262,7 @@ function AuthPage() {
               disabled={loading}
               onClick={() => setRole("company")}
             >
-              Empresa
+              {tr("Empresa")}
             </Button>
           </div>
         }
@@ -282,12 +294,12 @@ function AuthPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continuar con Google
+              {tr("Continuar con Google")}
             </Button>
 
             <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
               <div className="h-px flex-1 bg-border" />
-              <span>o con correo</span>
+              <span>{tr("o con correo")}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
           </>
@@ -296,27 +308,27 @@ function AuthPage() {
         <form onSubmit={handleEmail} className="space-y-4">
           {mode === "signup" && (
             <div>
-              <Label className="mb-2 block text-sm">Nombre completo</Label>
+              <Label className="mb-2 block text-sm">{tr("Nombre completo")}</Label>
               <Input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ana Pérez"
+                placeholder={tr("Ana Pérez")}
               />
             </div>
           )}
           <div>
-            <Label className="mb-2 block text-sm">Correo</Label>
+            <Label className="mb-2 block text-sm">{tr("Correo")}</Label>
             <Input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@correo.com"
+              placeholder={tr("tu@correo.com")}
             />
           </div>
           <div>
-            <Label className="mb-2 block text-sm">Contraseña</Label>
+            <Label className="mb-2 block text-sm">{tr("Contraseña")}</Label>
             <Input
               type="password"
               required
@@ -327,7 +339,9 @@ function AuthPage() {
           </div>
           {mode === "signup" && (
             <div>
-              <Label htmlFor="confirm-password" className="mb-2 block text-sm">Confirmar contraseña</Label>
+              <Label htmlFor="confirm-password" className="mb-2 block text-sm">
+                {tr("Confirmar contraseña")}
+              </Label>
               <Input
                 id="confirm-password"
                 type="password"
@@ -346,9 +360,9 @@ function AuthPage() {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : mode === "signup" ? (
-              "Crear cuenta"
+              tr("Crear cuenta")
             ) : (
-              "Entrar"
+              tr("Entrar")
             )}
           </Button>
         </form>
@@ -356,24 +370,24 @@ function AuthPage() {
         <p className="mt-6 text-center text-xs text-muted-foreground">
           {mode === "signup" ? (
             <>
-              ¿Ya tienes cuenta?{" "}
+              {tr("¿Ya tienes cuenta?")}{" "}
               <button
                 type="button"
                 onClick={() => setMode("login")}
                 className="font-medium text-primary hover:underline"
               >
-                Inicia sesión
+                {tr("Inicia sesión")}
               </button>
             </>
           ) : (
             <>
-              ¿Nuevo en InsurTalent?{" "}
+              {tr("¿Nuevo en InsurTalent?")}{" "}
               <button
                 type="button"
                 onClick={() => setMode("signup")}
                 className="font-medium text-primary hover:underline"
               >
-                {role === "company" ? "Registra tu empresa" : "Crea tu perfil"}
+                {role === "company" ? tr("Registra tu empresa") : tr("Crea tu perfil")}
               </button>
             </>
           )}

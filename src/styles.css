@@ -136,3 +136,7 @@
 @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(62,189,173,0.5); } 50% { box-shadow: 0 0 0 12px rgba(62,189,173,0); } }
 
 @utility animate-pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
+
+/* Mirror alignment for languages written from right to left. */
+html[dir="rtl"] .text-left { text-align: right; }
+html[dir="rtl"] .text-right { text-align: left; }

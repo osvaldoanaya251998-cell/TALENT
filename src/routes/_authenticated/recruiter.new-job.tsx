@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n/provider";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -58,6 +59,7 @@ const area = "w-full rounded-md border border-input bg-background px-3 py-2 text
 const select = "h-9 w-full rounded-md border border-input bg-background px-3 text-sm";
 
 function NewJob() {
+  const { tr } = useLanguage();
   const { user } = Route.useRouteContext();
   const { edit } = Route.useSearch();
   const navigate = useNavigate();
@@ -95,7 +97,7 @@ function NewJob() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!f.title.trim() || !f.company.trim() || f.ramos.length === 0 || !f.location.trim()) {
-      return toast.error("Completa título, empresa, al menos un ramo y ubicación.");
+      return toast.error(tr("Completa título, empresa, al menos un ramo y ubicación."));
     }
     setSaving(true);
     const payload = {
@@ -115,27 +117,27 @@ function NewJob() {
         });
     setSaving(false);
     if (res.error) return toast.error(res.error.message);
-    toast.success(edit ? "Vacante actualizada" : "Vacante publicada");
+    toast.success(tr(edit ? "Vacante actualizada" : "Vacante publicada"));
     navigate({ to: "/recruiter/dashboard" });
   };
 
   return (
-    <RecruiterShell title={edit ? "Editar vacante" : "Publicar nueva vacante"}>
+    <RecruiterShell title={edit ? tr("Editar vacante") : tr("Publicar nueva vacante")}>
       <form onSubmit={submit} className="space-y-6">
-        <Card t="1. Puesto">
+        <Card t={tr("1. Puesto")}>
           <Grid>
-            <F l="Título del puesto">
+            <F l={tr("Título del puesto")}>
               <Input
                 value={f.title}
                 onChange={(e) => set({ title: e.target.value })}
-                placeholder="Ej. Asesor Patrimonial Vida"
+                placeholder={tr("Ej. Asesor Patrimonial Vida")}
               />
             </F>
-            <F l="Empresa / Promotoría / Broker">
+            <F l={tr("Empresa / Promotoría / Broker")}>
               <Input value={f.company} onChange={(e) => set({ company: e.target.value })} />
             </F>
           </Grid>
-          <F l="Logo o imagen representativa de la empresa (opcional)">
+          <F l={tr("Logo o imagen representativa de la empresa (opcional)")}>
             <LogoUploader
               value={f.company_logo_url}
               onChange={(v) => set({ company_logo_url: v })}
@@ -143,7 +145,7 @@ function NewJob() {
             />
           </F>
           <div>
-            <Label className="mb-2 block text-sm">Ramo principal</Label>
+            <Label className="mb-2 block text-sm">{tr("Ramo principal")}</Label>
             <div className="flex flex-wrap gap-2">
               {RAMOS.map((r) => {
                 const on = f.ramos.includes(r);
@@ -156,56 +158,60 @@ function NewJob() {
                     }
                     className={`rounded-full border px-3 py-1 text-xs ${on ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}
                   >
-                    {r}
+                    {tr(r)}
                   </button>
                 );
               })}
             </div>
           </div>
         </Card>
-        <Card t="2. Compensación y requisitos">
+        <Card t={tr("2. Compensación y requisitos")}>
           <Grid>
-            <F l="Tipo de compensación">
+            <F l={tr("Tipo de compensación")}>
               <select
                 className={select}
                 value={f.pay_scheme}
                 onChange={(e) => set({ pay_scheme: e.target.value })}
               >
                 {PAY_SCHEMES.map((p) => (
-                  <option key={p}>{p}</option>
+                  <option key={p} value={p}>
+                    {tr(p)}
+                  </option>
                 ))}
               </select>
             </F>
-            <F l="Rango salarial estimado">
+            <F l={tr("Rango salarial estimado")}>
               <Input
                 value={f.salary_text}
                 onChange={(e) => set({ salary_text: e.target.value })}
-                placeholder="$20,000 – $35,000 + bonos"
+                placeholder={tr("$20,000 – $35,000 + bonos")}
               />
             </F>
-            <F l="Cédula CNSF requerida">
+            <F l={tr("Cédula CNSF requerida")}>
               <select
                 className={select}
                 value={f.cedula}
                 onChange={(e) => set({ cedula: e.target.value })}
               >
                 {CEDULAS.map((p) => (
-                  <option key={p}>{p}</option>
+                  <option key={p} value={p}>
+                    {tr(p)}
+                  </option>
                 ))}
               </select>
             </F>
           </Grid>
         </Card>
-        <Card t="3. Ubicación">
+        <Card t={tr("3. Ubicación")}>
           <Grid>
-            <F l="Ubicación">
+            <F l={tr("Ubicación")}>
               <Input
                 value={f.location}
                 onChange={(e) => set({ location: e.target.value })}
-                placeholder="Ciudad de México"
+                placeholder={tr("Ciudad de México")}
               />
             </F>
-            <F l="Modalidad">
+            <F l={tr("Modalidad")}>
               <select
                 className={select}
                 value={f.modality}
@@ -213,15 +219,15 @@ function NewJob() {
               >
                 {MODALITIES.map((m) => (
                   <option key={m.v} value={m.v}>
-                    {m.l}
+                    {tr(m.l)}
                   </option>
                 ))}
               </select>
             </F>
           </Grid>
         </Card>
-        <Card t="4. Detalle">
-          <F l="Descripción del puesto">
+        <Card t={tr("4. Detalle")}>
+          <F l={tr("Descripción del puesto")}>
             <textarea
               rows={4}
               className={area}
@@ -229,7 +235,7 @@ function NewJob() {
               onChange={(e) => set({ description: e.target.value })}
             />
           </F>
-          <F l="Requisitos">
+          <F l={tr("Requisitos")}>
             <textarea
               rows={3}
               className={area}
@@ -237,7 +243,7 @@ function NewJob() {
               onChange={(e) => set({ requirements: e.target.value })}
             />
           </F>
-          <F l="Beneficios">
+          <F l={tr("Beneficios")}>
             <textarea
               rows={3}
               className={area}
@@ -249,7 +255,7 @@ function NewJob() {
         <div className="flex justify-end">
           <Button type="submit" size="lg" disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {edit ? "Guardar cambios" : "Publicar vacante"}
+            {edit ? tr("Guardar cambios") : tr("Publicar vacante")}
           </Button>
         </div>
       </form>

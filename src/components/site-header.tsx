@@ -1,9 +1,11 @@
+import { useLanguage } from "@/lib/i18n/provider";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSelector } from "@/components/language-selector";
 import logo from "@/assets/insurtalent-logo.png";
 
 export function useSessionRole() {
@@ -63,6 +65,7 @@ export function Logo({ light = false }: { light?: boolean }) {
 }
 
 export function SiteHeader() {
+  const { tr, ready } = useLanguage();
   const s = useSessionRole();
   const [open, setOpen] = useState(false);
   const links = (
@@ -73,21 +76,21 @@ export function SiteHeader() {
         activeProps={{ className: "text-foreground" }}
         className="hover:text-foreground"
       >
-        Inicio
+        {tr("Inicio")}
       </Link>
       <Link
         to="/jobs"
         activeProps={{ className: "text-foreground" }}
         className="hover:text-foreground"
       >
-        Buscar empleo
+        {tr("Buscar empleo")}
       </Link>
       <Link
         to={s?.recruiter || s?.company ? "/recruiter/dashboard" : "/empresas"}
         activeProps={{ className: "text-foreground" }}
         className="hover:text-foreground"
       >
-        Para empresas
+        {tr("Para empresas")}
       </Link>
     </>
   );
@@ -95,23 +98,26 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
         <Logo />
-        <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
+        <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground lg:flex">
           {links}
         </nav>
         <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <LanguageSelector />
+          </div>
           <ThemeToggle />
           {s?.signedIn ? (
             <>
               {(s.recruiter || s.company) && (
                 <Link to="/recruiter/dashboard" className="hidden sm:block">
                   <Button variant="outline" size="sm">
-                    Panel de empresa
+                    {tr("Panel de empresa")}
                   </Button>
                 </Link>
               )}
               {!(s.recruiter || s.company) && (
                 <Link to="/profile">
-                  <Button size="sm">Mi perfil</Button>
+                  <Button size="sm">{tr("Mi perfil")}</Button>
                 </Link>
               )}
             </>
@@ -119,22 +125,30 @@ export function SiteHeader() {
             <>
               <Link to="/auth" search={{ mode: "login" }} className="hidden sm:block">
                 <Button variant="ghost" size="sm">
-                  Iniciar sesión
+                  {tr("Iniciar sesión")}
                 </Button>
               </Link>
               <Link to="/auth">
-                <Button size="sm">Registrarme</Button>
+                <Button size="sm">{tr("Registrarme")}</Button>
               </Link>
             </>
           )}
-          <button className="md:hidden p-2" onClick={() => setOpen((o) => !o)} aria-label="Menú">
+          <button
+            disabled={!ready}
+            className="lg:hidden p-2"
+            onClick={() => setOpen((o) => !o)}
+            aria-label={tr("Menú")}
+          >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
       {open && (
-        <nav className="flex flex-col gap-3 border-t border-border px-6 py-4 text-sm text-muted-foreground md:hidden">
+        <nav className="flex flex-col gap-3 border-t border-border px-6 py-4 text-sm text-muted-foreground lg:hidden">
           {links}
+          <div className="md:hidden">
+            <LanguageSelector />
+          </div>
         </nav>
       )}
     </header>
@@ -142,22 +156,27 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const { tr } = useLanguage();
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-10 md:flex-row">
         <Logo />
         <p className="text-center text-xs text-muted-foreground">
-          El punto de encuentro entre el talento experto y las mejores firmas del sector seguros. ©{" "}
+          {tr(
+            "El punto de encuentro entre el talento experto y las mejores firmas del sector seguros. ©",
+          )}{" "}
           {new Date().getFullYear()}
         </p>
         <div className="flex shrink-0 items-center gap-4 text-xs text-muted-foreground">
-          <Link to="/privacidad" className="hover:text-foreground">Aviso de privacidad</Link>
+          <Link to="/privacidad" className="hover:text-foreground">
+            {tr("Aviso de privacidad")}
+          </Link>
           <Link
             to="/auth"
             search={{ role: "company", mode: "login" }}
             className="hover:text-foreground"
           >
-            Acceso empresas
+            {tr("Acceso empresas")}
           </Link>
         </div>
       </div>

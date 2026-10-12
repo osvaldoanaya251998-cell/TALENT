@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n/provider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClipboardCheck, KanbanSquare, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/empresas")({
 });
 
 function Empresas() {
+  const { tr } = useLanguage();
   const session = useSessionRole();
   const items = [
     {
@@ -49,34 +51,35 @@ function Empresas() {
       <section className="bg-hero text-foreground">
         <div className="mx-auto max-w-5xl px-6 py-24 text-center">
           <h1 className="text-balance text-4xl font-bold tracking-tight md:text-6xl">
-            Recluta talento asegurador certificado
+            {tr("Recluta talento asegurador certificado")}
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-muted-foreground">
-            Aseguradoras, promotorías, brokers e insurtechs encuentran aquí a sus próximos agentes y
-            líderes comerciales.
+            {tr(
+              "Aseguradoras, promotorías, brokers e insurtechs encuentran aquí a sus próximos agentes y líderes comerciales.",
+            )}
           </p>
           {session?.signedIn ? (
             <Link to="/recruiter/dashboard">
               <Button size="lg" className="mt-8">
-                Entrar al panel de empresa <ArrowRight className="ml-2 h-4 w-4" />
+                {tr("Entrar al panel de empresa")} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           ) : (
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to="/auth" search={{ role: "company", mode: "signup" }}>
                 <Button size="lg">
-                  Registrarme como Empresa <ArrowRight className="ml-2 h-4 w-4" />
+                  {tr("Registrarme como Empresa")} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/auth" search={{ role: "company", mode: "login" }}>
                 <Button size="lg" variant="outline">
-                  Iniciar sesión como Empresa
+                  {tr("Iniciar sesión como Empresa")}
                 </Button>
               </Link>
             </div>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Acceso solo para cuentas de reclutador autorizadas.
+            {tr("Acceso solo para cuentas de reclutador autorizadas.")}
           </p>
         </div>
       </section>

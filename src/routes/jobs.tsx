@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n/provider";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -7,10 +8,20 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { JobCard, JobMeta } from "@/components/job-card";
-import { RAMOS, PAY_SCHEMES, CEDULAS, MODALITIES, VACANCY_COLUMNS, type Vacancy } from "@/lib/insurance";
+import {
+  RAMOS,
+  PAY_SCHEMES,
+  CEDULAS,
+  MODALITIES,
+  VACANCY_COLUMNS,
+  type Vacancy,
+} from "@/lib/insurance";
 
 const searchSchema = z.object({
-  q: z.string().optional(), ramo: z.string().optional(), loc: z.string().optional(), id: z.string().optional(),
+  q: z.string().optional(),
+  ramo: z.string().optional(),
+  loc: z.string().optional(),
+  id: z.string().optional(),
 });
 
 export const Route = createFileRoute("/jobs")({
@@ -18,9 +29,16 @@ export const Route = createFileRoute("/jobs")({
   head: () => ({
     meta: [
       { title: "Buscar empleo en seguros — InsurTalent" },
-      { name: "description", content: "Filtra vacantes por ramo (Vida, GMM, Autos, Daños, Fianzas), tipo de contrato, cédula CNSF y modalidad." },
+      {
+        name: "description",
+        content:
+          "Filtra vacantes por ramo (Vida, GMM, Autos, Daños, Fianzas), tipo de contrato, cédula CNSF y modalidad.",
+      },
       { property: "og:title", content: "Buscar empleo en seguros — InsurTalent" },
-      { property: "og:description", content: "Explora vacantes del sector asegurador y postúlate en un clic." },
+      {
+        property: "og:description",
+        content: "Explora vacantes del sector asegurador y postúlate en un clic.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -28,17 +46,37 @@ export const Route = createFileRoute("/jobs")({
   component: Jobs,
 });
 
-function toggle(list: string[], v: string) { return list.includes(v) ? list.filter((x) => x !== v) : [...list, v]; }
+function toggle(list: string[], v: string) {
+  return list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+}
 
-function FilterGroup({ title, options, value, onChange }: { title: string; options: { v: string; l: string }[]; value: string[]; onChange: (v: string[]) => void }) {
+function FilterGroup({
+  title,
+  options,
+  value,
+  onChange,
+}: {
+  title: string;
+  options: { v: string; l: string }[];
+  value: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const { tr } = useLanguage();
   return (
     <div>
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {tr(title)}
+      </div>
       <div className="space-y-1.5">
         {options.map((o) => (
           <label key={o.v} className="flex cursor-pointer items-center gap-2 text-sm">
-            <input type="checkbox" checked={value.includes(o.v)} onChange={() => onChange(toggle(value, o.v))} className="h-4 w-4 accent-[var(--primary)]" />
-            {o.l}
+            <input
+              type="checkbox"
+              checked={value.includes(o.v)}
+              onChange={() => onChange(toggle(value, o.v))}
+              className="h-4 w-4 accent-[var(--primary)]"
+            />
+            {tr(o.l)}
           </label>
         ))}
       </div>
@@ -47,6 +85,7 @@ function FilterGroup({ title, options, value, onChange }: { title: string; optio
 }
 
 function Jobs() {
+  const { tr } = useLanguage();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [all, setAll] = useState<Vacancy[] | null>(null);
@@ -60,7 +99,11 @@ function Jobs() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    supabase.from("vacancies").select(VACANCY_COLUMNS).eq("is_active", true).order("created_at", { ascending: false })
+    supabase
+      .from("vacancies")
+      .select(VACANCY_COLUMNS)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
       .then(({ data }) => setAll((data as unknown as Vacancy[]) ?? []));
   }, []);
 
@@ -69,9 +112,11 @@ function Jobs() {
     const terms = q.toLowerCase().replace("cédula a/b", "").trim();
     return all.filter((v) => {
       const hay = `${v.title} ${v.company} ${v.description} ${v.ramos.join(" ")}`.toLowerCase();
-      if (q.toLowerCase() === "remoto") { if (v.modality !== "remoto") return false; }
-      else if (q.toLowerCase() === "cédula a/b") { if (!["Cédula A", "Cédula B"].includes(v.cedula)) return false; }
-      else if (terms && !terms.split(/\s+/).every((t) => hay.includes(t))) return false;
+      if (q.toLowerCase() === "remoto") {
+        if (v.modality !== "remoto") return false;
+      } else if (q.toLowerCase() === "cédula a/b") {
+        if (!["Cédula A", "Cédula B"].includes(v.cedula)) return false;
+      } else if (terms && !terms.split(/\s+/).every((t) => hay.includes(t))) return false;
       if (loc && !(v.location ?? "").toLowerCase().includes(loc.toLowerCase())) return false;
       if (ramos.length && !v.ramos.some((r) => ramos.includes(r))) return false;
       if (pays.length && !pays.includes(v.pay_scheme ?? "")) return false;
@@ -89,45 +134,127 @@ function Jobs() {
       <SiteHeader />
       <div className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 md:flex-row md:px-6">
-          <label className="flex flex-1 items-center gap-2 rounded-xl border border-border px-3"><Search className="h-4 w-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cargo o palabra clave" className="h-11 w-full bg-transparent text-sm outline-none" /></label>
-          <input value={loc} onChange={(e) => setLoc(e.target.value)} placeholder="Ubicación" className="h-11 rounded-xl border border-border bg-transparent px-3 text-sm outline-none md:w-60" />
-          <Button variant="outline" className="md:hidden" onClick={() => setShowFilters((s) => !s)}><SlidersHorizontal className="mr-2 h-4 w-4" />Filtros</Button>
+          <label className="flex flex-1 items-center gap-2 rounded-xl border border-border px-3">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={tr("Cargo o palabra clave")}
+              className="h-11 w-full bg-transparent text-sm outline-none"
+            />
+          </label>
+          <input
+            value={loc}
+            onChange={(e) => setLoc(e.target.value)}
+            placeholder={tr("Ubicación")}
+            className="h-11 rounded-xl border border-border bg-transparent px-3 text-sm outline-none md:w-60"
+          />
+          <Button variant="outline" className="md:hidden" onClick={() => setShowFilters((s) => !s)}>
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            {tr("Filtros")}
+          </Button>
         </div>
       </div>
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:px-6 lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,1.2fr)]">
         <aside className={`${showFilters ? "block" : "hidden"} space-y-6 lg:block`}>
-          <FilterGroup title="Ramo de seguro" options={opts(RAMOS)} value={ramos} onChange={setRamos} />
-          <FilterGroup title="Tipo de contrato" options={[{ v: "Mixto", l: "Sueldo base + comisiones" }, { v: "Solo Comisión", l: "Solo comisión" }, { v: "Sueldo Base Fijo", l: "Sueldo base fijo" }].filter((o) => (PAY_SCHEMES as readonly string[]).includes(o.v))} value={pays} onChange={setPays} />
-          <FilterGroup title="Cédula CNSF" options={opts(CEDULAS)} value={ceds} onChange={setCeds} />
-          <FilterGroup title="Modalidad" options={MODALITIES.map((m) => ({ v: m.v, l: m.l }))} value={mods} onChange={setMods} />
+          <FilterGroup
+            title={tr("Ramo de seguro")}
+            options={opts(RAMOS)}
+            value={ramos}
+            onChange={setRamos}
+          />
+          <FilterGroup
+            title={tr("Tipo de contrato")}
+            options={[
+              { v: "Mixto", l: "Sueldo base + comisiones" },
+              { v: "Solo Comisión", l: "Solo comisión" },
+              { v: "Sueldo Base Fijo", l: "Sueldo base fijo" },
+            ].filter((o) => (PAY_SCHEMES as readonly string[]).includes(o.v))}
+            value={pays}
+            onChange={setPays}
+          />
+          <FilterGroup
+            title={tr("Cédula CNSF")}
+            options={opts(CEDULAS)}
+            value={ceds}
+            onChange={setCeds}
+          />
+          <FilterGroup
+            title={tr("Modalidad")}
+            options={MODALITIES.map((m) => ({ v: m.v, l: m.l }))}
+            value={mods}
+            onChange={setMods}
+          />
         </aside>
         <div className="space-y-3">
-          <div className="text-sm text-muted-foreground">{all === null ? "Cargando…" : `${list.length} vacantes`}</div>
-          {all === null ? <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" /> :
-            list.length === 0 ? <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">Sin resultados con estos filtros.</div> :
-            list.map((v) => <JobCard key={v.id} v={v} active={selected?.id === v.id} onClick={() => { setSelId(v.id); if (window.innerWidth < 1024) document.getElementById("detalle")?.scrollIntoView({ behavior: "smooth" }); }} />)}
+          <div className="text-sm text-muted-foreground">
+            {all === null ? (
+              tr("Cargando…")
+            ) : (
+              <>
+                {list.length} {tr(list.length === 1 ? "vacante" : "vacantes")}
+              </>
+            )}
+          </div>
+          {all === null ? (
+            <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
+          ) : list.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+              {tr("Sin resultados con estos filtros.")}
+            </div>
+          ) : (
+            list.map((v) => (
+              <JobCard
+                key={v.id}
+                v={v}
+                active={selected?.id === v.id}
+                onClick={() => {
+                  setSelId(v.id);
+                  if (window.innerWidth < 1024)
+                    document.getElementById("detalle")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
+            ))
+          )}
         </div>
         {selected && (
-          <article id="detalle" className="h-fit rounded-2xl border border-border bg-card p-7 shadow-soft lg:sticky lg:top-24">
+          <article
+            id="detalle"
+            className="h-fit rounded-2xl border border-border bg-card p-7 shadow-soft lg:sticky lg:top-24"
+          >
             <div className="flex items-start gap-3">
               <CompanyLogo name={selected.company} src={selected.company_logo_url} size={48} />
               <div>
                 <h2 className="text-xl font-bold">{selected.title}</h2>
-                <p className="text-sm text-muted-foreground">{selected.company ?? "Confidencial"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selected.company ?? tr("Confidencial")}
+                </p>
               </div>
             </div>
-            <div className="mt-4"><JobMeta v={selected} /></div>
-            {selected.salary_text && <div className="mt-3 font-semibold text-primary">{selected.salary_text}</div>}
-            <Button size="lg" className="mt-6 w-full" onClick={() => navigate({ to: "/apply", search: { vacancy: selected.slug } })}>
-              Postularme en 1 clic <ArrowRight className="ml-2 h-4 w-4" />
+            <div className="mt-4">
+              <JobMeta v={selected} />
+            </div>
+            {selected.salary_text && (
+              <div className="mt-3 font-semibold text-primary">{selected.salary_text}</div>
+            )}
+            <Button
+              size="lg"
+              className="mt-6 w-full"
+              onClick={() => navigate({ to: "/apply", search: { vacancy: selected.slug } })}
+            >
+              {tr("Postularme en 1 clic")} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <p className="mt-2 text-center text-xs text-muted-foreground">Usamos tu perfil y CV guardados. <Link to="/profile" className="underline">Revisar perfil</Link></p>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              {tr("Usamos tu perfil y CV guardados.")}{" "}
+              <Link to="/profile" className="underline">
+                {tr("Revisar perfil")}
+              </Link>
+            </p>
             <div className="mt-6 space-y-5 text-sm">
-              {selected.description && <Block t="Descripción" b={selected.description} />}
-              {selected.requirements && <Block t="Requisitos" b={selected.requirements} />}
-              {selected.benefits && <Block t="Beneficios" b={selected.benefits} />}
-              <Block t="Ramos" b={selected.ramos.join(", ") || "—"} />
+              {selected.description && <Block t={tr("Descripción")} b={selected.description} />}
+              {selected.requirements && <Block t={tr("Requisitos")} b={selected.requirements} />}
+              {selected.benefits && <Block t={tr("Beneficios")} b={selected.benefits} />}
+              <Block t={tr("Ramos")} b={selected.ramos.join(", ") || "—"} />
             </div>
           </article>
         )}
@@ -138,5 +265,10 @@ function Jobs() {
 }
 
 function Block({ t, b }: { t: string; b: string }) {
-  return <div><div className="mb-1 font-semibold">{t}</div><p className="whitespace-pre-line text-muted-foreground">{b}</p></div>;
+  return (
+    <div>
+      <div className="mb-1 font-semibold">{t}</div>
+      <p className="whitespace-pre-line text-muted-foreground">{b}</p>
+    </div>
+  );
 }

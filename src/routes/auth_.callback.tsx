@@ -1,3 +1,5 @@
+import { LanguageSelector } from "@/components/language-selector";
+import { useLanguage } from "@/lib/i18n/provider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/auth_/callback")({
 });
 
 function AuthCallbackPage() {
+  const { tr } = useLanguage();
   const [failed, setFailed] = useState(false);
   const { next } = Route.useSearch();
 
@@ -60,27 +63,32 @@ function AuthCallbackPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-hero px-6 text-foreground">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-soft">
+        <div className="mb-4 flex justify-end">
+          <LanguageSelector />
+        </div>
         <Link to="/" className="mb-6 inline-flex items-center justify-center gap-2">
           <img src={momentoLogo} alt="InsurTalent" className="h-6 w-6" />
-          <span className="text-sm font-semibold">InsurTalent Careers</span>
+          <span className="text-sm font-semibold">{tr("InsurTalent Careers")}</span>
         </Link>
         {failed ? (
           <>
-            <h1 className="text-xl font-semibold tracking-tight">No pudimos confirmar tu sesión</h1>
+            <h1 className="text-xl font-semibold tracking-tight">
+              {tr("No pudimos confirmar tu sesión")}
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Intenta iniciar sesión con Google nuevamente.
+              {tr("Intenta iniciar sesión con Google nuevamente.")}
             </p>
             <Link
               to="/auth"
               className="mt-6 inline-flex text-sm font-medium text-primary hover:underline"
             >
-              Volver a iniciar sesión
+              {tr("Volver a iniciar sesión")}
             </Link>
           </>
         ) : (
           <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            Confirmando acceso…
+            {tr("Confirmando acceso…")}
           </div>
         )}
       </div>

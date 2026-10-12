@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n/provider";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
@@ -12,6 +13,7 @@ export function RecruiterShell({
   action?: ReactNode;
   children: ReactNode;
 }) {
+  const { tr } = useLanguage();
   const s = useSessionRole();
   const tabs = [
     { to: "/recruiter/dashboard", l: "Dashboard" },
@@ -33,7 +35,7 @@ export function RecruiterShell({
                 className="whitespace-nowrap border-b-2 border-transparent py-3 text-muted-foreground hover:text-foreground"
                 activeProps={{ className: "!border-primary !text-foreground font-medium" }}
               >
-                {t.l}
+                {tr(t.l)}
               </Link>
             ))}
         </div>
@@ -46,15 +48,15 @@ export function RecruiterShell({
         ) : !s.recruiter ? (
           <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-10 text-center">
             <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
-            <h1 className="mt-3 text-lg font-semibold">Acceso solo para reclutadores</h1>
+            <h1 className="mt-3 text-lg font-semibold">{tr("Acceso solo para reclutadores")}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Tu cuenta no tiene permisos de reclutador.
+              {tr("Tu cuenta no tiene permisos de reclutador.")}
             </p>
           </div>
         ) : (
           <>
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{tr(title)}</h1>
               {action}
             </div>
             {children}

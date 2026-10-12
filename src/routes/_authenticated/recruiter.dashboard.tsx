@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/i18n/provider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -36,6 +37,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 function Dashboard() {
+  const { tr, language } = useLanguage();
   const { user } = Route.useRouteContext();
   const session = useSessionRole();
   const [vacs, setVacs] = useState<Vacancy[]>([]);
@@ -64,7 +66,7 @@ function Dashboard() {
       .update({ status, is_active: status === "activa" })
       .eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success(`Vacante ${status}`);
+    toast.success(`${tr("Vacante")} ${tr(status)}`);
     load();
   };
 
@@ -81,22 +83,22 @@ function Dashboard() {
 
   return (
     <RecruiterShell
-      title="Dashboard"
+      title={tr("Dashboard")}
       action={
         <Link to="/recruiter/new-job">
           <Button>
             <Plus className="mr-1.5 h-4 w-4" />
-            Publicar nueva vacante
+            {tr("Publicar nueva vacante")}
           </Button>
         </Link>
       }
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((m) => (
-          <div key={m.l} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+          <div key={tr(m.l)} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
             <m.i className="h-5 w-5 text-primary" />
             <div className="mt-3 text-3xl font-bold">{m.v}</div>
-            <div className="text-sm text-muted-foreground">{m.l}</div>
+            <div className="text-sm text-muted-foreground">{tr(m.l)}</div>
           </div>
         ))}
       </div>
@@ -104,11 +106,11 @@ function Dashboard() {
         <table className="w-full min-w-[720px] text-sm">
           <thead className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="p-4">Vacante</th>
-              <th className="p-4">Estado</th>
-              <th className="p-4">Publicada</th>
-              <th className="p-4">Candidatos</th>
-              <th className="p-4 text-right">Acciones</th>
+              <th className="p-4">{tr("Vacante")}</th>
+              <th className="p-4">{tr("Estado")}</th>
+              <th className="p-4">{tr("Publicada")}</th>
+              <th className="p-4">{tr("Candidatos")}</th>
+              <th className="p-4 text-right">{tr("Acciones")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -124,22 +126,22 @@ function Dashboard() {
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[v.status] ?? ""}`}
                   >
-                    {v.status}
+                    {tr(v.status)}
                   </span>
                 </td>
                 <td className="p-4 text-muted-foreground">
-                  {new Date(v.created_at).toLocaleDateString("es-MX")}
+                  {new Date(v.created_at).toLocaleDateString(language)}
                 </td>
                 <td className="p-4">{apps.filter((a) => a.vacancy_id === v.id).length}</td>
                 <td className="p-4">
                   <div className="flex justify-end gap-1">
                     <Link to="/recruiter/candidates" search={{ vacancy: v.id }}>
-                      <Button size="sm" variant="ghost" title="Ver candidatos">
+                      <Button size="sm" variant="ghost" title={tr("Ver candidatos")}>
                         <Users className="h-4 w-4" />
                       </Button>
                     </Link>
                     <Link to="/recruiter/new-job" search={{ edit: v.id }}>
-                      <Button size="sm" variant="ghost" title="Editar">
+                      <Button size="sm" variant="ghost" title={tr("Editar")}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -147,7 +149,7 @@ function Dashboard() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        title="Pausar"
+                        title={tr("Pausar")}
                         onClick={() => setStatus(v.id, "pausada")}
                       >
                         <Pause className="h-4 w-4" />
@@ -156,7 +158,7 @@ function Dashboard() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        title="Activar"
+                        title={tr("Activar")}
                         onClick={() => setStatus(v.id, "activa")}
                       >
                         <Play className="h-4 w-4" />
@@ -166,7 +168,7 @@ function Dashboard() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        title="Cerrar"
+                        title={tr("Cerrar")}
                         onClick={() => setStatus(v.id, "cerrada")}
                       >
                         <XCircle className="h-4 w-4" />
