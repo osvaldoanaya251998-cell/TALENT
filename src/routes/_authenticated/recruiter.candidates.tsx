@@ -33,7 +33,11 @@ import { RecruiterShell } from "@/components/recruiter-shell";
 export const Route = createFileRoute("/_authenticated/recruiter/candidates")({
   validateSearch: (s) =>
     z
-      .object({ vacancy: z.string().optional(), view: z.enum(["kanban", "table"]).optional() })
+      .object({
+        vacancy: z.string().optional(),
+        view: z.enum(["kanban", "table"]).optional(),
+        application: z.string().optional(),
+      })
       .parse(s),
   head: () => ({
     meta: [{ title: "Candidatos — InsurTalent" }, { name: "robots", content: "noindex" }],
@@ -94,16 +98,20 @@ type Card = {
 
 function Kanban() {
   const { tr } = useLanguage();
-  const { vacancy, view = "kanban" } = Route.useSearch();
+  const { vacancy, view = "kanban", application } = Route.useSearch();
   const navigate = useNavigate();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingNotes, setSavingNotes] = useState<Record<string, boolean>>({});
   const setView = (view: "kanban" | "table") =>
-    navigate({ to: "/recruiter/candidates", search: { vacancy, view } });
+    navigate({ to: "/recruiter/candidates", search: { vacancy, view, application } });
   const [cards, setCards] = useState<Card[] | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = cards?.find((c) => c.id === selectedId);
+
+  useEffect(() => {
+    if (application && cards?.some((card) => card.id === application)) setSelectedId(application);
+  }, [application, cards]);
 
   useEffect(() => {
     (async () => {
@@ -443,7 +451,11 @@ function Kanban() {
       <Dialog
         open={!!selected}
         onOpenChange={(open) => {
-          if (!open) setSelectedId(null);
+          if (!open) {
+            setSelectedId(null);
+            if (application)
+              navigate({ to: "/recruiter/candidates", search: { vacancy, view }, replace: true });
+          }
         }}
       >
         <DialogContent className="max-h-[85dvh] w-[95vw] max-w-2xl overflow-y-auto">

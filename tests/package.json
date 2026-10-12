@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node company-registration.mjs && node direct-applications.mjs",
+    "test": "node company-registration.mjs && node direct-applications.mjs && node application-emails.mjs",
     "test:browser": "node --test company-registration.browser.test.mjs direct-applications.browser.test.mjs candidate-notes.browser.test.mjs languages.browser.test.mjs"
   },
   "devDependencies": {

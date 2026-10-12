@@ -37,7 +37,7 @@ function AuthCallbackPage() {
       if (!active || !session || completed) return;
       completed = true;
       const targetPath = buildPostAuthRedirectPath(
-        readPostAuthRedirect() ?? { next },
+        next ? { next } : (readPostAuthRedirect() ?? { next }),
         session.user.user_metadata.role,
       );
       clearPostAuthRedirect();

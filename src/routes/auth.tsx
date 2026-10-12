@@ -69,7 +69,7 @@ function AuthPage() {
       ]);
       const isAdmin = adminRole.data === true;
       const targetPath = buildPostAuthRedirectPath(
-        stored ?? { next: dest, vacancy },
+        next ? { next: dest, vacancy } : (stored ?? { next: dest, vacancy }),
         recruiterRole.data === true ? "company" : userData.user.user_metadata.role,
       );
       clearPostAuthRedirect();

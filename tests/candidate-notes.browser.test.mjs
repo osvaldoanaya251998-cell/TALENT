@@ -7,6 +7,35 @@ before(async()=>{browser=await chromium.launch({executablePath:process.env.CHROM
 after(async()=>browser?.close());
 const label='Apuntes de Ana para Agente';
 const saveLabel='Guardar apuntes de Ana para Agente';
+
+test('Email link opens the exact candidate summary and clears on close',async()=>{
+ const {context,page}=await setup();
+ try{
+  await page.goto(`${origin}/recruiter/candidates?vacancy=vac-a&application=app-a`);
+  const dialog=page.getByRole('dialog',{name:'Ana',exact:true});
+  await dialog.waitFor();
+  await dialog.getByText('Experiencia en seguros y atención a clientes.',{exact:true}).waitFor();
+  await dialog.getByRole('button',{name:'Abrir CV',exact:true}).waitFor();
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('[role="dialog"]'));
+  assert.equal(new URL(page.url()).searchParams.has('application'),false);
+  assert.equal(new URL(page.url()).searchParams.get('vacancy'),'vac-a');
+ }finally{await context.close();}
+});
+
+test('Email link survives company authentication callback without opening an unknown candidate',async()=>{
+ const {context,page}=await setup();
+ try{
+  const next='/recruiter/candidates?vacancy=vac-a&application=app-a';
+  await context.addInitScript(()=>sessionStorage.setItem('momento_post_auth_redirect',JSON.stringify({next:'/profile'})));
+  await page.goto(`${origin}/auth/callback?next=${encodeURIComponent(next)}`);
+  await page.getByRole('dialog',{name:'Ana',exact:true}).waitFor();
+  assert.equal(new URL(page.url()).searchParams.get('application'),'app-a');
+  await page.goto(`${origin}/recruiter/candidates?application=not-authorized`);
+  await page.getByRole('heading',{name:'Candidatos',exact:true}).waitFor();
+  assert.equal(await page.getByRole('dialog').count(),0);
+ }finally{await context.close();}
+});
 async function setup(failOnce=false){
  const context=await browser.newContext();
  const uid='00000000-0000-4000-8000-000000000001';
@@ -133,7 +162,9 @@ test('Candidate name in the table opens the same summary, and controls keep work
   await page.getByRole('dialog',{name:'Ana',exact:true}).waitFor();
   await page.keyboard.press('Escape');
   await page.getByRole('dialog').waitFor({state:'hidden'});
+  const statusSaved=page.waitForResponse(response=>new URL(response.url()).pathname==='/rest/v1/applications'&&response.request().method()==='PATCH');
   await page.getByLabel('Estado de Ana para Agente',{exact:true}).selectOption('entrevista');
+  await statusSaved;
   assert.equal(await page.getByRole('dialog').count(),0);
   assert.deepEqual(updates[0].body,{status:'entrevista'});
  }finally{await context.close();}

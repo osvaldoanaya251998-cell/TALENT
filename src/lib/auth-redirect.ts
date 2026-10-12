@@ -22,7 +22,13 @@ export function sanitizeNextPath(value?: string | null, fallback = FALLBACK_PATH
 }
 
 export function buildPostAuthRedirectPath(redirect?: PostAuthRedirect | null, role?: unknown) {
-  if (role === "company") return "/recruiter/dashboard";
+  if (role === "company") {
+    const next = sanitizeNextPath(redirect?.next, "/recruiter/dashboard");
+    const url = new URL(next, SAFE_ORIGIN);
+    return url.pathname === "/recruiter/candidates"
+      ? `${url.pathname}${url.search}`
+      : "/recruiter/dashboard";
+  }
 
   const next = sanitizeNextPath(redirect?.next, FALLBACK_PATH);
   const url = new URL(next, SAFE_ORIGIN);
