@@ -16,6 +16,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_SOCIAL_IMAGE } from "@/lib/site-metadata";
 
 const themeBootScript = `(() => { let saved; try { saved = localStorage.getItem('momento_theme'); } catch (_) {} const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; const dark = saved === 'dark' || (saved !== 'light' && prefersDark); document.documentElement.classList.toggle('dark', dark); document.documentElement.style.colorScheme = dark ? 'dark' : 'light'; })();`;
 
@@ -92,36 +93,38 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Trabaja en InsurTalent — Carreras" },
+      { title: SITE_TITLE },
       {
         name: "description",
-        content:
-          "Únete a InsurTalent. Cultura startup, crecimiento profesional real y capacitación. Aplica en minutos.",
+        content: SITE_DESCRIPTION,
       },
-      { property: "og:title", content: "Trabaja en InsurTalent — Carreras" },
+      { property: "og:title", content: SITE_TITLE },
       {
         property: "og:description",
-        content:
-          "Únete a InsurTalent. Cultura startup, crecimiento profesional real y capacitación. Aplica en minutos.",
+        content: SITE_DESCRIPTION,
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "InsurTalent" },
+      { property: "og:locale", content: "es_MX" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Trabaja en InsurTalent — Carreras" },
+      { name: "twitter:title", content: SITE_TITLE },
       {
         name: "twitter:description",
-        content:
-          "Únete a InsurTalent. Cultura startup, crecimiento profesional real y capacitación. Aplica en minutos.",
+        content: SITE_DESCRIPTION,
       },
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7e21c83e-4d02-413b-aefb-9709727cecff/id-preview-78be09a8--231686be-2162-4111-ae95-385ff6686933.lovable.app-1783036216425.png",
+        content: SITE_SOCIAL_IMAGE,
       },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: SITE_TITLE },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7e21c83e-4d02-413b-aefb-9709727cecff/id-preview-78be09a8--231686be-2162-4111-ae95-385ff6686933.lovable.app-1783036216425.png",
+        content: SITE_SOCIAL_IMAGE,
       },
+      { name: "twitter:image:alt", content: SITE_TITLE },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -151,7 +154,7 @@ function RootDocument({ children }: { children: ReactNode }) {
           if (meta && "title" in meta && typeof meta.title === "string") return meta.title;
         }
       }
-      return "Trabaja en InsurTalent — Carreras";
+      return SITE_TITLE;
     },
   });
   useEffect(() => {

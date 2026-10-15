@@ -16,25 +16,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { JobCard } from "@/components/job-card";
 import { RAMOS, VACANCY_COLUMNS, type Vacancy } from "@/lib/insurance";
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "InsurTalent — Bolsa de trabajo del sector seguros" },
+      { title: SITE_TITLE },
       {
         name: "description",
-        content:
-          "El punto de encuentro entre el talento experto y las mejores firmas del sector seguros. Vacantes en Vida, GMM, Autos, Daños y Fianzas.",
+        content: SITE_DESCRIPTION,
       },
-      { property: "og:title", content: "InsurTalent — Bolsa de trabajo del sector seguros" },
+      { property: "og:title", content: SITE_TITLE },
       {
         property: "og:description",
-        content:
-          "Vacantes para agentes, ajustadores, suscriptores y gerentes comerciales en aseguradoras, promotorías y brokers.",
+        content: SITE_DESCRIPTION,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: SITE_URL },
     ],
+    links: [{ rel: "canonical", href: SITE_URL }],
   }),
   component: Landing,
 });
