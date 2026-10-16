@@ -1,4 +1,5 @@
 import { useLanguage } from "@/lib/i18n/provider";
+import { SITE_URL } from "@/lib/site-metadata";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -41,7 +42,9 @@ export const Route = createFileRoute("/jobs")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: new URL("jobs", SITE_URL).href },
     ],
+    links: [{ rel: "canonical", href: new URL("jobs", SITE_URL).href }],
   }),
   component: Jobs,
 });

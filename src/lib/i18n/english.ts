@@ -1,5 +1,7 @@
 // Common controls work immediately, including when automatic translation is offline.
 export const ENGLISH: Record<string, string> = {
+  "InsurTalent conecta talento experto con aseguradoras, promotorías, brokers e insurtechs en México.":
+    "InsurTalent connects experienced professionals with insurers, agencies, brokers and insurtech companies in Mexico.",
   "Estado de": "Status for",
   "Guardar apuntes de": "Save notes for",
   "Vacante publicada": "Job posted",

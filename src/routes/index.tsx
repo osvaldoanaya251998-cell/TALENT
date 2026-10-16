@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { JobCard } from "@/components/job-card";
 import { RAMOS, VACANCY_COLUMNS, type Vacancy } from "@/lib/insurance";
-import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site-metadata";
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION, SITE_STRUCTURED_DATA } from "@/lib/site-metadata";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,8 +34,15 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: SITE_URL },
+      { name: "robots", content: "index,follow,max-image-preview:large" },
     ],
     links: [{ rel: "canonical", href: SITE_URL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(SITE_STRUCTURED_DATA).replace(/</g, "\\u003c"),
+      },
+    ],
   }),
   component: Landing,
 });
@@ -73,7 +80,7 @@ function Hero() {
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
             {tr(
-              "El punto de encuentro entre el talento experto y las mejores firmas del sector seguros.",
+              "InsurTalent conecta talento experto con aseguradoras, promotorías, brokers e insurtechs en México.",
             )}
           </p>
         </div>

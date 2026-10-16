@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /profile
+Disallow: /recruiter
+Disallow: /mcp
+Disallow: /.mcp/
+
+Sitemap: https://talent.insurtalentmx.workers.dev/sitemap.xml

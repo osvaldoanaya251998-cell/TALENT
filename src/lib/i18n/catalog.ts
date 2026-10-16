@@ -1,5 +1,6 @@
 // Static interface text only. Candidate data, notes and job descriptions are excluded.
 export const UI_MESSAGES = [
+  "InsurTalent conecta talento experto con aseguradoras, promotorías, brokers e insurtechs en México.",
   "$20,000 – $35,000 + bonos",
   ") aún no tiene rol de administrador. Un admin debe ejecutar en la base de datos:",
   "1. Puesto",

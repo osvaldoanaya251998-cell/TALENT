@@ -1,4 +1,5 @@
 import { useLanguage } from "@/lib/i18n/provider";
+import { SITE_URL } from "@/lib/site-metadata";
 import { createFileRoute } from "@tanstack/react-router";
 import { PrivacyNoticeContent, PRIVACY_POLICY_VERSION } from "@/components/privacy-notice";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/privacidad")({
           "Consulta el aviso de privacidad de InsurTalent y el tratamiento de datos personales en la plataforma.",
       },
     ],
+    links: [{ rel: "canonical", href: new URL("privacidad", SITE_URL).href }],
   }),
   component: PrivacyPage,
 });

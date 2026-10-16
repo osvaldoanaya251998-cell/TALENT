@@ -1,4 +1,5 @@
 import { useLanguage } from "@/lib/i18n/provider";
+import { SITE_URL } from "@/lib/site-metadata";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClipboardCheck, KanbanSquare, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,9 @@ export const Route = createFileRoute("/empresas")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { property: "og:url", content: new URL("empresas", SITE_URL).href },
     ],
+    links: [{ rel: "canonical", href: new URL("empresas", SITE_URL).href }],
   }),
   component: Empresas,
 });
