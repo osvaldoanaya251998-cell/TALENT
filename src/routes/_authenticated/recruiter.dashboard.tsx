@@ -53,8 +53,14 @@ function Dashboard() {
       query,
       supabase.from("applications").select("vacancy_id,status"),
     ]);
-    setVacs((v.data as unknown as Vacancy[]) ?? []);
-    setApps(a.data ?? []);
+    const visibleVacancies = (v.data as unknown as Vacancy[]) ?? [];
+    const visibleIds = new Set(visibleVacancies.map((vacancy) => vacancy.id));
+    setVacs(visibleVacancies);
+    setApps(
+      (a.data ?? []).filter(
+        (application) => application.vacancy_id && visibleIds.has(application.vacancy_id),
+      ),
+    );
   }, [session?.admin, user.id]);
   useEffect(() => {
     load();

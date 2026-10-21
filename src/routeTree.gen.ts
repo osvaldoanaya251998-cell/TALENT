@@ -27,7 +27,9 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedRecruiterCandidatesRouteImport } from './routes/_authenticated/recruiter.candidates'
 import { Route as AuthenticatedRecruiterDashboardRouteImport } from './routes/_authenticated/recruiter.dashboard'
+import { Route as AuthenticatedRecruiterMetricsRouteImport } from './routes/_authenticated/recruiter.metrics'
 import { Route as AuthenticatedRecruiterNewJobRouteImport } from './routes/_authenticated/recruiter.new-job'
+import { Route as AuthenticatedRecruiterTurnoverRouteImport } from './routes/_authenticated/recruiter.turnover'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -123,10 +125,22 @@ const AuthenticatedRecruiterDashboardRoute =
     path: '/recruiter/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedRecruiterMetricsRoute =
+  AuthenticatedRecruiterMetricsRouteImport.update({
+    id: '/recruiter/metrics',
+    path: '/recruiter/metrics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRecruiterNewJobRoute =
   AuthenticatedRecruiterNewJobRouteImport.update({
     id: '/recruiter/new-job',
     path: '/recruiter/new-job',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRecruiterTurnoverRoute =
+  AuthenticatedRecruiterTurnoverRouteImport.update({
+    id: '/recruiter/turnover',
+    path: '/recruiter/turnover',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -148,7 +162,9 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/recruiter/candidates': typeof AuthenticatedRecruiterCandidatesRoute
   '/recruiter/dashboard': typeof AuthenticatedRecruiterDashboardRoute
+  '/recruiter/metrics': typeof AuthenticatedRecruiterMetricsRoute
   '/recruiter/new-job': typeof AuthenticatedRecruiterNewJobRoute
+  '/recruiter/turnover': typeof AuthenticatedRecruiterTurnoverRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -168,7 +184,9 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/recruiter/candidates': typeof AuthenticatedRecruiterCandidatesRoute
   '/recruiter/dashboard': typeof AuthenticatedRecruiterDashboardRoute
+  '/recruiter/metrics': typeof AuthenticatedRecruiterMetricsRoute
   '/recruiter/new-job': typeof AuthenticatedRecruiterNewJobRoute
+  '/recruiter/turnover': typeof AuthenticatedRecruiterTurnoverRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -190,7 +208,9 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/recruiter/candidates': typeof AuthenticatedRecruiterCandidatesRoute
   '/_authenticated/recruiter/dashboard': typeof AuthenticatedRecruiterDashboardRoute
+  '/_authenticated/recruiter/metrics': typeof AuthenticatedRecruiterMetricsRoute
   '/_authenticated/recruiter/new-job': typeof AuthenticatedRecruiterNewJobRoute
+  '/_authenticated/recruiter/turnover': typeof AuthenticatedRecruiterTurnoverRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -212,7 +232,9 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/recruiter/candidates'
     | '/recruiter/dashboard'
+    | '/recruiter/metrics'
     | '/recruiter/new-job'
+    | '/recruiter/turnover'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,7 +254,9 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/recruiter/candidates'
     | '/recruiter/dashboard'
+    | '/recruiter/metrics'
     | '/recruiter/new-job'
+    | '/recruiter/turnover'
   id:
     | '__root__'
     | '/'
@@ -253,7 +277,9 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/recruiter/candidates'
     | '/_authenticated/recruiter/dashboard'
+    | '/_authenticated/recruiter/metrics'
     | '/_authenticated/recruiter/new-job'
+    | '/_authenticated/recruiter/turnover'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -401,11 +427,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRecruiterDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/recruiter/metrics': {
+      id: '/_authenticated/recruiter/metrics'
+      path: '/recruiter/metrics'
+      fullPath: '/recruiter/metrics'
+      preLoaderRoute: typeof AuthenticatedRecruiterMetricsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/recruiter/new-job': {
       id: '/_authenticated/recruiter/new-job'
       path: '/recruiter/new-job'
       fullPath: '/recruiter/new-job'
       preLoaderRoute: typeof AuthenticatedRecruiterNewJobRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recruiter/turnover': {
+      id: '/_authenticated/recruiter/turnover'
+      path: '/recruiter/turnover'
+      fullPath: '/recruiter/turnover'
+      preLoaderRoute: typeof AuthenticatedRecruiterTurnoverRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -416,7 +456,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRecruiterCandidatesRoute: typeof AuthenticatedRecruiterCandidatesRoute
   AuthenticatedRecruiterDashboardRoute: typeof AuthenticatedRecruiterDashboardRoute
+  AuthenticatedRecruiterMetricsRoute: typeof AuthenticatedRecruiterMetricsRoute
   AuthenticatedRecruiterNewJobRoute: typeof AuthenticatedRecruiterNewJobRoute
+  AuthenticatedRecruiterTurnoverRoute: typeof AuthenticatedRecruiterTurnoverRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -424,7 +466,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRecruiterCandidatesRoute: AuthenticatedRecruiterCandidatesRoute,
   AuthenticatedRecruiterDashboardRoute: AuthenticatedRecruiterDashboardRoute,
+  AuthenticatedRecruiterMetricsRoute: AuthenticatedRecruiterMetricsRoute,
   AuthenticatedRecruiterNewJobRoute: AuthenticatedRecruiterNewJobRoute,
+  AuthenticatedRecruiterTurnoverRoute: AuthenticatedRecruiterTurnoverRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

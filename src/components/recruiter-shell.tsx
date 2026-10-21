@@ -17,6 +17,8 @@ export function RecruiterShell({
   const s = useSessionRole();
   const tabs = [
     { to: "/recruiter/dashboard", l: "Dashboard" },
+    { to: "/recruiter/metrics", l: "Métricas y KPI" },
+    { to: "/recruiter/turnover", l: "Rotación de personal" },
     { to: "/recruiter/candidates", l: "Candidatos" },
     { to: "/recruiter/new-job", l: "Publicar vacante" },
     { to: "/admin", l: "Gestionar postulaciones" },
