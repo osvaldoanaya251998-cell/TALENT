@@ -92,6 +92,7 @@ export function SiteHeader() {
       >
         {tr("Para empresas")}
       </Link>
+      <a href="https://voz-traductor.insurtalentmx.workers.dev/" className="inline-flex items-center gap-1 whitespace-nowrap font-semibold text-primary hover:opacity-80" title="Abrir traductor de voz con inteligencia artificial">🎙️ Traductor IA</a>
     </>
   );
   return (
